@@ -316,7 +316,7 @@ namespace CollapseLauncher.GameSettings.Genshin
                 _globalPerfData = globalPerfData.Create(graphicsData, graphicsData.volatileVersion);
  
                 string data = JsonSerializer.Serialize(this, typeof(GeneralData), GeneralDataContext.Default) + '\0';
-                byte[] dataByte = Encoding.UTF8.GetBytes(data);
+                byte[] dataByte = Encoding.UTF8.GetBytes(data.Replace("u0022","\""));
 
                 RegistryRoot.SetValue(_ValueName, dataByte, RegistryValueKind.Binary);
 #if DEBUG
