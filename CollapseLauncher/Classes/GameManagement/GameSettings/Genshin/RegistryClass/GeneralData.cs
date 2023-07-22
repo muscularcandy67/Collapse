@@ -288,9 +288,10 @@ namespace CollapseLauncher.GameSettings.Genshin
                 {
                     ReadOnlySpan<byte> byteStr = (byte[])value;
 #if DEBUG
-                    // If you want to debug GeneralData, Append this to the LogWriteLine:
-                    // '\r\n{Encoding.UTF8.GetString((byte[])value, 0, ((byte[])value).Length - 1)'
+                    // If you want to debug GeneralData, Uncomment the following log:
                     // WARNING: VERY EXPENSIVE CPU TIME WILL BE USED
+                    // LogWriteLine($"Loaded Genshin Settings: {_ValueName} \r\n{Encoding.UTF8.GetString((byte[])value, 0, ((byte[])value).Length - 1)}", LogType.Debug, true);
+
                     LogWriteLine($"Loaded Genshin Settings: {_ValueName}", LogType.Debug, true);
 #endif
                     JsonSerializerOptions options = new JsonSerializerOptions()
@@ -343,7 +344,7 @@ namespace CollapseLauncher.GameSettings.Genshin
                     $"\r\n      Gamma                : {gammaValue}", LogType.Debug);
                 // If you want to debug GeneralData, uncomment this LogWriteLine
                 // WARNING: VERY EXPENSIVE CPU TIME WILL BE USED
-                // LogWriteLine($"Saved Genshin Settings: {_ValueName}\r\n{Encoding.UTF8.GetString((byte[])value, 0, ((byte[])value).Length - 1)", LogType.Debug, true);
+               // LogWriteLine($"Saved Genshin Settings: {_ValueName}\r\n{Encoding.UTF8.GetString((byte[])dataByte, 0, ((byte[])dataByte).Length - 1)}", LogType.Debug, true);
 #endif
             }
             catch (Exception ex)
