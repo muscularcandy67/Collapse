@@ -258,6 +258,18 @@ namespace CollapseLauncher.Pages
             get => (int)Settings.SettingsGeneralData.graphicsData.Antialiasing - 1;
             set => Settings.SettingsGeneralData.graphicsData.Antialiasing = (AntialiasingOption)(value + 1);
         }
+
+        public bool DisableTeamPageBackground
+        {
+            get => (bool)Settings.SettingsGeneralData.disableTeamPageBackgroundSwitch;
+            set => Settings.SettingsGeneralData.disableTeamPageBackgroundSwitch = value;
+        }
+
+        public int GlobalIllumination
+        {
+            get => (int)Settings.SettingsGeneralData.graphicsData.GlobalIllumination - 1;
+            set => Settings.SettingsGeneralData.graphicsData.GlobalIllumination = (GlobalIlluminationOption)(value + 1);
+        }
         #endregion
 
         #region Audio
