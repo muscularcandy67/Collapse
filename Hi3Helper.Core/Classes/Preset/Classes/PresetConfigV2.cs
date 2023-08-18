@@ -60,15 +60,27 @@ namespace Hi3Helper.Preset
     {
         public Dictionary<string, Dictionary<string, PresetConfigV2>>? MetadataV2 { get; set; }
         public string? MasterKey { get; set; }
-        public int MasterKeyBitLength { get; set; }
+        public int? MasterKeyBitLength { get; set; }
 
 #nullable disable
+        public void AddStrings(Metadata m)
+        {
+            if (m == null) throw new ArgumentNullException();
+            
+            if (m.MasterKey!=null) this.MasterKey = m.MasterKey;
+            if(m.MasterKeyBitLength!=null) this.MasterKeyBitLength = m.MasterKeyBitLength;
+            if (this.MetadataV2 == null) this.MetadataV2 = new();
+            if (m.MetadataV2 == null) return;
+            foreach (var temp in m.MetadataV2)
+            {
+                this.MetadataV2.Add(temp.Key, temp.Value);
+            }
+        }
         public void DecryptStrings()
         {
             int gameCount = MetadataV2?.Count ?? 0;
             mhyEncTool Decryptor = new mhyEncTool();
-            Decryptor.InitMasterKey(MasterKey, MasterKeyBitLength, RSAEncryptionPadding.Pkcs1);
-
+            Decryptor.InitMasterKey(this.MasterKey, this.MasterKeyBitLength!.Value, RSAEncryptionPadding.Pkcs1);
             string[] gameKeys = MetadataV2.Keys.ToArray();
             for (int i = 0; i < gameCount; i++)
             {

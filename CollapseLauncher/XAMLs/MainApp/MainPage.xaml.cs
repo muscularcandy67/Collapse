@@ -341,7 +341,7 @@ namespace CollapseLauncher
                 await SpawnPushAppNotification();
 
                 // Check Metadata Update in Background
-                await CheckMetadataUpdateInBackground();
+                //await CheckMetadataUpdateInBackground();
             }
             catch (JsonException ex)
             {

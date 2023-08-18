@@ -232,7 +232,7 @@ namespace Hi3Helper.DiscordPresence
         {
             _activity = new Activity
             {
-                Details = StrToByteUtf8($"{activityName} {(!isGameStatusEnabled ? ConfigV2Store.CurrentConfigV2GameCategory : Lang._Misc.DiscordRP_Ad)}"),
+                Details = StrToByteUtf8($"{activityName} {(isGameStatusEnabled ? Lang._Misc.DiscordRP_Ad : ConfigV2Store.CurrentConfigV2GameCategory)}"),
                 State = StrToByteUtf8($"{Lang._Misc.DiscordRP_Region} {ConfigV2Store.CurrentConfigV2GameRegion}"),
                 Assets = new ActivityAssets
                 {

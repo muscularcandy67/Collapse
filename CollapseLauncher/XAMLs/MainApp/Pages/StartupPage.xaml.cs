@@ -184,7 +184,7 @@ namespace CollapseLauncher.Pages
 
         private async void NextPage_Click(object sender, RoutedEventArgs e)
         {
-            if (!IsConfigV2StampExist() || !IsConfigV2ContentExist())
+            if (!IsConfigV2ContentExist() || !IsConfigV2StampExist())
             {
                 await HideLoadingPopup(false, Lang._StartupPage.Pg1LoadingTitle1, Lang._StartupPage.Pg1LoadingSubitle1);
                 await DownloadConfigV2Files(true, true);
