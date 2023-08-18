@@ -1,4 +1,4 @@
-using CollapseLauncher.GameSettings.Genshin;
+﻿using CollapseLauncher.GameSettings.Genshin;
 using CollapseLauncher.GameSettings.Honkai;
 using CollapseLauncher.GameSettings.StarRail;
 using CollapseLauncher.GameVersioning;
@@ -47,6 +47,13 @@ namespace CollapseLauncher.Statics
                     _GameCache = null;
                     _GameRepair = new GenshinRepair(UIElementParent, _GameVersion, _GameVersion.GameAPIProp.data.game.latest.decompressed_path);
                     _GameInstall = new GenshinInstall(UIElementParent, _GameVersion);
+                    break;
+                case GameType.Zenless:
+                    _GameVersion = new GameTypeStarRailVersion(UIElementParent, _APIResouceProp, _GamePreset);
+                    _GameSettings = new StarRailSettings(_GameVersion);
+                    _GameCache = new StarRailCache(UIElementParent, _GameVersion);
+                    _GameRepair = new StarRailRepair(UIElementParent, _GameVersion);
+                    _GameInstall = new StarRailInstall(UIElementParent, _GameVersion);
                     break;
                 default:
                     throw new NotSupportedException($"[GamePresetProperty.Ctor] Game type: {GamePreset.GameType} ({GamePreset.ProfileName} - {GamePreset.ZoneName}) is not supported!");
@@ -101,7 +108,8 @@ namespace CollapseLauncher.Statics
 #if DEBUG
             IsRepairEnabled = true,
             IsCacheUpdateEnabled = GamePreset.GameType.Equals(GameType.Genshin)
-                                   || GamePreset.GameType.Equals(GameType.Zenless) ? false : true,
+                                   || GamePreset.GameType.Equals(GameType.Zenless)
+                                   || GamePreset.GameType.Equals(GameType.Unknown) ? false : true,
 #else
             IsRepairEnabled = GamePreset.IsRepairEnabled,
             IsCacheUpdateEnabled = GamePreset.IsCacheUpdateEnabled,

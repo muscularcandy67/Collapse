@@ -157,6 +157,9 @@ namespace Hi3Helper.DiscordPresence
                         case "Genshin Impact":
                             EnablePresence(isInitialStart, AppDiscordApplicationID_GI);
                             break;
+                        case "Zenless Zone Zero":
+                            EnablePresence(isInitialStart, AppDiscordApplicationID_ZZZ);
+                            break;
                         default:
                             Logger.LogWriteLine($"Discord Presence (Unknown Game)");
                             break;
