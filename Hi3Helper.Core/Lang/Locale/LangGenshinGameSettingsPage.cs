@@ -66,6 +66,7 @@
                 public string Graphics_VSync { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_VSync;
                 public string Graphics_AAMode { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_AAMode;
                 public string Graphics_VolFogs { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_VolFogs;
+                public string Graphics_VolFogs_ToolTip { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_VolFogs_ToolTip;
                 public string Graphics_ReflectionQuality { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_ReflectionQuality;
                 public string Graphics_MotionBlur { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_MotionBlur;
                 public string Graphics_BloomQuality { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_BloomQuality;
@@ -73,8 +74,10 @@
                 public string Graphics_SubsurfaceScattering { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_SubsurfaceScattering;
                 public string Graphics_TeammateFX { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_TeammateFX;
                 public string Graphics_AnisotropicFiltering { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_AnisotropicFiltering;
-                public string Graphics_DisableTeamPageBackground { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_DisableTeamPageBackground;
+                public string Graphics_TeamPageBackground { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_TeamPageBackground;
                 public string Graphics_GlobalIllumination { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_GlobalIllumination;
+                public string Graphics_GlobalIllumination_Help1 { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_GlobalIllumination_Help1;
+                public string Graphics_GlobalIllumination_Help2 { get; set; } = LangFallback?._GenshinGameSettingsPage.Graphics_GlobalIllumination_Help2;
                 #endregion
 
                 #region Specs

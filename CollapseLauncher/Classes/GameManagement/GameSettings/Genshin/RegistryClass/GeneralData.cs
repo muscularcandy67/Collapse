@@ -24,17 +24,7 @@ namespace CollapseLauncher.GameSettings.Genshin
         //Using guide from https://github.com/Myp3a/GenshinConfigurator/wiki/Config-format
         //Thanks Myp3a!
 
-        /// <summary>
-        /// deviceUUID<br/>
-        /// This is supposed to be empty
-        /// </summary>
         public string deviceUUID { get; set; } = "";
-
-        /// <summary>
-        /// userLocalDataVersionId<br/>
-        /// This should be static<br/>
-        /// Value: 0.0.1
-        /// </summary>
         public string userLocalDataVersionId { get; set; } = "0.0.1";
 
         /// <summary>
@@ -75,9 +65,6 @@ namespace CollapseLauncher.GameSettings.Genshin
         /// </summary>
         public string selectedServerName { get; set; } = "os_usa";
 
-        /// <summary>
-        /// I don't know what this do
-        /// </summary>
         public int localLevelIndex { get; set; } = 0;
         public string deviceID { get; set; } = "";
         public string targetUID { get; set; } = "";
@@ -109,7 +96,7 @@ namespace CollapseLauncher.GameSettings.Genshin
 
         /// <summary>
         /// This is a dict that keeps track of graphics settings changes.<br/>
-        /// Save to ignore (?)
+        /// Always port graphicsData to this also, if not then settings are not applied.
         /// </summary>
         // Temporary for fallback before the implementation is made
         [JsonIgnore]
@@ -118,12 +105,7 @@ namespace CollapseLauncher.GameSettings.Genshin
         [JsonPropertyName("globalPerfData")]
         public string _globalPerfData { get; set; }
 
-        //[JsonIgnore]
-        //public globalPerfData globalPerfData { get; set; }
 
-        /// <summary>
-        /// Something about minimap config ?
-        /// </summary>
         public int miniMapConfig { get; set; } = 1;
 
         /// <summary>
@@ -132,31 +114,11 @@ namespace CollapseLauncher.GameSettings.Genshin
         /// </summary>
         public bool enableCameraSlope { get; set; } = true;
 
-        /// <summary>
-        /// This defines "<c>Smart combat camera</c>" whatever that is.<br/>
-        /// Default: true
-        /// </summary>
         public bool enableCameraCombatLock { get; set; } = true;
-
-        /// <summary>
-        /// not sure either what these does.
-        /// </summary>
         public bool completionPkg { get; set; } = false;
         public bool completionPlayGoPkg { get; set; } = false;
-
-        /// <summary>
-        /// Could be for PlayStation multiplayer stuff
-        /// </summary>
         public bool onlyPlayWithPSPlayer { get; set; } = false;
-
-        /// <summary>
-        /// Mysterious~
-        /// </summary>
         public bool needPlayGoFullPkgPatch { get; set; } = false;
-
-        /// <summary>
-        /// Mobile notification stuff
-        /// </summary>
         public bool resinNotification { get; set; } = true;
         public bool exploreNotification { get; set; } = true;
 
@@ -207,9 +169,6 @@ namespace CollapseLauncher.GameSettings.Genshin
         /// </summary>
         public int audioOutput { get; set; } = 0;
 
-        /// <summary>
-        /// Audio related stuff...
-        /// </summary>
         public bool _audioSuccessInit { get; set; } = true;
         public bool enableAudioChangeAndroidMinimumBufferCapacity { get; set; } = true;
         public int audioAndroidMiniumBufferCapacity { get; set; } = 2048;
@@ -228,18 +187,15 @@ namespace CollapseLauncher.GameSettings.Genshin
         /// </summary>
         public int vibrationIntensity { get; set; } = 5;
 
-        /// <summary>
-        /// Some vibration related stuff ?
-        /// </summary>
         public bool usingNewVibrationSetting { get; set; } = true;
 
         /// <summary>
-        /// Is not an actual blur setting
+        /// Is not an actual blur setting, look at GraphicsData for the real deal.
         /// </summary>
         public bool motionBlur { get; set; } = true;
 
         /// <summary>
-        /// Gyro Aiming stuff, most likely not used in PC.
+        /// Gyro Aiming controls, used for those who use controller that has Gyro control.
         /// </summary>
         public bool gyroAiming { get; set; } = false;
         public int gyroHorMoveSpeedIndex { get; set; } = 2;
@@ -250,6 +206,7 @@ namespace CollapseLauncher.GameSettings.Genshin
         public bool gyroExcludeRightStickVerInput { get; set; } = false;
 
         //unsure what these does, probably HDR stuff? doesn't have HDR monitor to test...
+        //also doesn't seem to be tied into any actual game settings as Genshin doesn't have a native HDR
         public bool firstHDRSetting { get; set; } = true;
         public decimal maxLuminosity { get; set; } = 0.0m;
         public decimal uiPaperWhite { get; set; } = 0.0m;
@@ -257,6 +214,8 @@ namespace CollapseLauncher.GameSettings.Genshin
 
         /// <summary>
         /// This defines "<c>Gamma</c>" slider in-game. <br/>
+        /// Accepted values : 1.4f - 3.0f <br/>
+        /// <c>WARNING:</c> Value is inverted
         /// </summary>
         public double gammaValue { get; set; } = 2.2f;
 
@@ -278,8 +237,6 @@ namespace CollapseLauncher.GameSettings.Genshin
         //[JsonIgnore]
         //public Controllers _overrideControllerMapValueList { get; set; }
 
-        //misc values
-        //just, idk, ignore?
         public bool rewiredDisableKeyboard { get; set; } = false;
         public bool rewiredEnableKeyboard { get; set; } = false;
         public bool rewiredEnableEDS { get; set; } = false;
@@ -290,7 +247,10 @@ namespace CollapseLauncher.GameSettings.Genshin
         public bool forceDisableQuestResourceManagement { get; set; } = false;
         public bool needReportQuestResourceDeleteStatusFiles { get; set; } = false;
 
-        // disableTeamPageBackgroundSwitch (bool false)
+        /// <summary>
+        /// This defines "<c>The background of the Party Setup screen will change based on your current region</c>" in-game combo box <br/>
+        /// Default: true
+        /// </summary>
         public bool disableTeamPageBackgroundSwitch { get; set; } = false;
 
         public bool mtrCached { get; set; } = true;
@@ -322,6 +282,12 @@ namespace CollapseLauncher.GameSettings.Genshin
 
         #region Methods
 #nullable enable
+#if DEBUG
+        // Set this to true if you want to dump the entire JSON of Genshin Settings to console
+        // Warning: Resource intensive!
+        private static bool DumpJSON = false;
+#endif
+
         public static GeneralData Load()
         {
             try
@@ -333,17 +299,20 @@ namespace CollapseLauncher.GameSettings.Genshin
                 {
                     ReadOnlySpan<byte> byteStr = (byte[])value;
 #if DEBUG
-                    // If you want to debug GeneralData, Append this to the LogWriteLine:
-                    // \r\n{Encoding.UTF8.GetString((byte[])value, 0, ((byte[])value).Length - 1)}
-                    // WARNING: VERY EXPENSIVE CPU TIME WILL BE USED
-                    //LogWriteLine($"Loaded Genshin Settings: {_ValueName}", LogType.Debug, true);
-                    JsonSerializerOptions options_debug = new JsonSerializerOptions()
+                    if (DumpJSON)
                     {
-                        TypeInfoResolver = GenshinSettingsJSONContext.Default,
-                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                        WriteIndented = true
-                    };
-                    LogWriteLine($"Loaded Genshin Settings: {_ValueName}\r\n{JsonSerializer.Serialize(JsonSerializer.Deserialize<GeneralData>(Encoding.UTF8.GetString((byte[])value, 0, ((byte[])value).Length - 1), options_debug), options_debug)}", LogType.Debug, true);
+                        LogWriteLine($"RAW Genshin Settings: {_ValueName}\r\n" +
+                            $"{Encoding.UTF8.GetString((byte[])value)}", LogType.Debug, true);
+
+                        JsonSerializerOptions options_debug = new JsonSerializerOptions()
+                        {
+                            TypeInfoResolver = GenshinSettingsJSONContext.Default,
+                            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                            WriteIndented = true
+                        };
+                        LogWriteLine($"Deserialized Genshin Settings: {_ValueName}\r\n{JsonSerializer.Serialize(JsonSerializer.Deserialize<GeneralData>(Encoding.UTF8.GetString((byte[])value, 0, ((byte[])value).Length - 1), options_debug), options_debug)}", LogType.Debug, true);
+                    }
+                    else LogWriteLine($"Loaded Genshin Settings: {_ValueName}", LogType.Debug, true);
 #endif
                     JsonSerializerOptions options = new JsonSerializerOptions()
                     {
@@ -382,26 +351,29 @@ namespace CollapseLauncher.GameSettings.Genshin
 
                 RegistryRoot.SetValue(_ValueName, dataByte, RegistryValueKind.Binary);
 #if DEBUG
-                // Only tracking actually used items (besides GlobalPerfData and GraphicsData)
-                //LogWriteLine($"Saved Genshin Settings: {_ValueName}" +
-                //    $"\r\n      Text Language        : {deviceLanguageType}" +
-                //    $"\r\n      VO Language          : {deviceVoiceLanguageType}" +
-                //    $"\r\n      Audio - Master Volume: {volumeGlobal}" +
-                //    $"\r\n      Audio - Music Volume : {volumeMusic}" +
-                //    $"\r\n      Audio - SFX Volume   : {volumeSFX}" +
-                //    $"\r\n      Audio - Voice Volume : {volumeVoice}" +
-                //    $"\r\n      Audio - Dynamic Range: {audioDynamicRange}" +
-                //    $"\r\n      Audio - Surround     : {audioOutput}" +
-                //    $"\r\n      Gamma                : {gammaValue}", LogType.Debug);
-                // If you want to debug GeneralData, uncomment this LogWriteLine
-                // WARNING: VERY EXPENSIVE CPU TIME WILL BE USED
-                JsonSerializerOptions options_debug = new JsonSerializerOptions()
+                if (DumpJSON)
                 {
-                    TypeInfoResolver = GenshinSettingsJSONContext.Default,
-                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                    WriteIndented = true
-                };
-                LogWriteLine($"Saved Genshin Settings: {_ValueName}\r\n{JsonSerializer.Serialize(this, typeof(GeneralData), options_debug)}", LogType.Debug, true);
+                    JsonSerializerOptions options_debug = new JsonSerializerOptions()
+                    {
+                        TypeInfoResolver = GenshinSettingsJSONContext.Default,
+                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                        WriteIndented = true
+                    };
+                    LogWriteLine($"Saved Genshin Settings: {_ValueName}\r\n{JsonSerializer.Serialize(this, typeof(GeneralData), options_debug)}", LogType.Debug, true);
+                }
+                else
+                {
+                    LogWriteLine($"Saved Genshin Settings: {_ValueName}" +
+                        $"\r\n      Text Language        : {deviceLanguageType}" +
+                        $"\r\n      VO Language          : {deviceVoiceLanguageType}" +
+                        $"\r\n      Audio - Master Volume: {volumeGlobal}" +
+                        $"\r\n      Audio - Music Volume : {volumeMusic}" +
+                        $"\r\n      Audio - SFX Volume   : {volumeSFX}" +
+                        $"\r\n      Audio - Voice Volume : {volumeVoice}" +
+                        $"\r\n      Audio - Dynamic Range: {audioDynamicRange}" +
+                        $"\r\n      Audio - Surround     : {audioOutput}" +
+                        $"\r\n      Gamma                : {gammaValue}", LogType.Debug);
+                }
 #endif
             }
             catch (Exception ex)

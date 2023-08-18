@@ -201,8 +201,37 @@ namespace CollapseLauncher.Pages
 
         public int ShadowQuality
         {
-            get => (int)Settings.SettingsGeneralData.graphicsData.ShadowQuality - 1;
-            set => Settings.SettingsGeneralData.graphicsData.ShadowQuality = (ShadowQualityOption)(value + 1);
+            get
+            {
+                int curValue = (int)Settings.SettingsGeneralData.graphicsData.ShadowQuality - 1;
+
+                // Disable Volumetric Fog when ShadowQuality is not Medium or higher
+                if (curValue < 2)
+                {
+                    VolumetricFogToggle.IsChecked = false;
+                    VolumetricFogToggle.IsEnabled = false;
+                }
+                else 
+                {
+                    VolumetricFogToggle.IsEnabled = true; 
+                }
+
+                return curValue;
+            }
+            set
+            {
+                if (value < 2)
+                {
+                    VolumetricFogToggle.IsChecked = false;
+                    VolumetricFogToggle.IsEnabled = false;
+                }
+                else 
+                {
+                    VolumetricFogToggle.IsEnabled = true; 
+                }
+
+                Settings.SettingsGeneralData.graphicsData.ShadowQuality = (ShadowQualityOption)(value + 1);
+            } 
         }
 
         public int VisualEffects
@@ -259,10 +288,10 @@ namespace CollapseLauncher.Pages
             set => Settings.SettingsGeneralData.graphicsData.Antialiasing = (AntialiasingOption)(value + 1);
         }
 
-        public bool DisableTeamPageBackground
+        public bool TeamPageBackground
         {
-            get => (bool)Settings.SettingsGeneralData.disableTeamPageBackgroundSwitch;
-            set => Settings.SettingsGeneralData.disableTeamPageBackgroundSwitch = value;
+            get => (bool)!Settings.SettingsGeneralData.disableTeamPageBackgroundSwitch;
+            set => Settings.SettingsGeneralData.disableTeamPageBackgroundSwitch = !value;
         }
 
         public int GlobalIllumination
