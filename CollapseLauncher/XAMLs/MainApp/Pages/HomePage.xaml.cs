@@ -1441,9 +1441,15 @@ namespace CollapseLauncher.Pages
         private void UpdatePlaytime(bool reg = true, int CPtV = 0)
         {
             int CurrentPlaytimeValue = reg ? ReadPlaytimeFromRegistry(CurrentGameProperty._GameVersion.GamePreset.ConfigRegistryLocation) : CPtV;
-            HourPlaytimeTextBox.Text = (CurrentPlaytimeValue / 3600).ToString();
-            MinutePlaytimeTextBox.Text = (CurrentPlaytimeValue % 3600 / 60).ToString();
-            PlaytimeMainBtn.Text = HourPlaytimeTextBox.Text + "h " + MinutePlaytimeTextBox.Text + "m";
+            int days = (CurrentPlaytimeValue / 86400);
+            int hours = (CurrentPlaytimeValue % 86400) / 3600;
+            int minutes = (CurrentPlaytimeValue % 3600) / 60;
+            int seconds = CurrentPlaytimeValue - (days * 86400) - (hours * 3600) - (minutes * 60);
+            DaysPlaytimeTextBox.Text = days.ToString();
+            HourPlaytimeTextBox.Text = hours.ToString();
+            MinutePlaytimeTextBox.Text = minutes.ToString();
+            SecondsPlaytimeTextBox.Text = seconds.ToString();
+            PlaytimeMainBtn.Text = DaysPlaytimeTextBox.Text + "d " + HourPlaytimeTextBox.Text + "h " + MinutePlaytimeTextBox.Text + "m " + SecondsPlaytimeTextBox.Text + "s";
         }
 
         private static int ReadPlaytimeFromRegistry(string RegionRegKey)
