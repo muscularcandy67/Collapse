@@ -365,6 +365,18 @@ namespace CollapseLauncher.Dialogs
             );
         }
 
+        public static async Task<ContentDialogResult> Dialog_ResetKeyboardShortcuts(UIElement Content)
+        {
+            return await SpawnDialog(
+                Lang._Dialogs.ResetKbShortcutsTitle,
+                Lang._Dialogs.ResetKbShortcutsSubtitle,
+                Content,
+                Lang._Misc.NoCancel,
+                Lang._Misc.Yes,
+                null
+                );
+        }
+
         public static async Task<ContentDialogResult> SpawnDialog(
             string title, object content, UIElement Content,
             string closeText = null, string primaryText = null,
