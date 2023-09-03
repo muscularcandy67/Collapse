@@ -77,6 +77,7 @@ namespace CollapseLauncher
                 m_mainPage = this;
                 LoadingPopupPill.Translation += Shadow32;
                 LoadingCancelBtn.Translation += Shadow16;
+                ToggleNotificationPanelBtn.Translation += Shadow16;
                 WebView2Frame.Navigate(typeof(BlankPage));
                 Loaded += StartRoutine;
             }
@@ -159,7 +160,7 @@ namespace CollapseLauncher
 #endif
                 LoadGamePreset();
                 SetThemeParameters();
-                
+
                 VersionNumberIndicator.Text = AppCurrentVersion.VersionString;
 #if DEBUG
                 VersionNumberIndicator.Text += "d";
@@ -766,7 +767,7 @@ namespace CollapseLauncher
 
             InitKeyboardShortcuts();
             HideLoadingPopup(false, Lang._MainPage.RegionLoadingTitle, Preset.ZoneFullname);
-            if (await LoadRegionFromCurrentConfigV2(Preset))
+            if (await LoadRegionFromCurrentConfigV2(Preset, true))
             {
                 MainFrameChanger.ChangeMainFrame(Page);
                 HideLoadingPopup(true, Lang._MainPage.RegionLoadingTitle, Preset.ZoneFullname);
@@ -1157,11 +1158,15 @@ namespace CollapseLauncher
                 NotificationLostFocusBackground.Visibility = Visibility.Visible;
                 NotificationLostFocusBackground.Opacity = 0.3;
                 NotificationPanel.Translation += Shadow48;
+                ToggleNotificationPanelBtn.Translation -= Shadow16;
+                (ToggleNotificationPanelBtn.Content as FontIcon).FontFamily = (FontFamily)Application.Current.Resources["FontAwesomeSolid"];
             }
             else
             {
                 NotificationLostFocusBackground.Opacity = 0;
                 NotificationPanel.Translation -= Shadow48;
+                ToggleNotificationPanelBtn.Translation += Shadow16;
+                (ToggleNotificationPanelBtn.Content as FontIcon).FontFamily = (FontFamily)Application.Current.Resources["FontAwesome"];
                 await Task.Delay(200);
                 NotificationLostFocusBackground.Visibility = Visibility.Collapsed;
             }
