@@ -1,4 +1,4 @@
-﻿using CollapseLauncher.GameSettings.Base;
+using CollapseLauncher.GameSettings.Base;
 using CollapseLauncher.GameSettings.Universal;
 using CollapseLauncher.Interfaces;
 using Microsoft.Win32;
@@ -38,6 +38,7 @@ namespace CollapseLauncher.GameSettings.Genshin
             SettingsCollapseScreen = CollapseScreenSetting.Load();
             SettingsCollapseMisc = CollapseMiscSetting.Load();
             SettingsScreen = ScreenManager.Load();
+            
         }
 
         public void ReloadSettings()
