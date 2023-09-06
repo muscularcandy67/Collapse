@@ -73,6 +73,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Content Include="Lang\de-de.json">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 		<Content Include="Lang\en-us.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
@@ -81,6 +84,9 @@
 		</Content>
 		<Content Include="Lang\id-id.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Lang\th-TH.json">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Lang\zh-cn.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
