@@ -256,7 +256,9 @@
                                             <ToolTipService.ToolTip>
                                                 <StackPanel>
                                                     <StackPanel Margin="8,8,8,0" Visibility="{Binding IsQRExist, Converter={ThemeResource BooleanToVisibilityConverter}}">
-                                                        <Image Source="{Binding QR}" Width="160" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                                        <Border Background="White" Margin="0,0,0,8">
+                                                            <Image Source="{Binding QR}" Width="160" HorizontalAlignment="Center"/>
+                                                        </Border>
                                                         <TextBlock Text="{Binding QR_Description}" HorizontalAlignment="Center" FontWeight="Bold" TextWrapping="Wrap"
                                                                Visibility="{Binding IsQRDescriptionExist, Converter={ThemeResource BooleanToVisibilityConverter}}"/>
                                                     </StackPanel>
@@ -293,7 +295,7 @@
                           VerticalAlignment="Bottom"
                           Width="{x:Bind localWindowSize:WindowSize.CurrentWindowSize.BannerIconWidth}" Margin="{x:Bind localWindowSize:WindowSize.CurrentWindowSize.BannerIconMargin}">
                             <Grid x:Name="ImageEventImgShadow"/>
-                            <Image x:Name="ImageEventImg" s:Effects.Shadow="{ThemeResource SharedDropShadow}" PointerPressed="ClickImageEventSpriteLink"/>
+                            <Image x:Name="ImageEventImg" s:Effects.Shadow="{ThemeResource SharedDropShadow}" PointerPressed="ClickImageEventSpriteLink" Loaded="SetHandCursor"/>
                         </Grid>
                         <StackPanel x:Name="ImageCarouselAndPostPanel" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2"
                                 Margin="{x:Bind localWindowSize:WindowSize.CurrentWindowSize.PostPanelBottomMargin}" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Bottom">
@@ -340,10 +342,11 @@
                                                     <ItemsControl ItemsSource="{x:Bind regionShared:LauncherConfig.regionNewsProp.articlePanel.Events}">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
-                                                                <Button HorizontalAlignment="Stretch" Tag="{Binding url}" Click="OpenButtonLinkFromTag">
+                                                                <Button HorizontalAlignment="Stretch" Tag="{Binding url}" Click="OpenButtonLinkFromTag" Loaded="SetHandCursor">
                                                                     <Button.Template>
                                                                         <ControlTemplate>
-                                                                            <Grid ToolTipService.ToolTip="{Binding title}" HorizontalAlignment="Stretch" Margin="0,2">
+                                                                            <Grid ToolTipService.ToolTip="{Binding title}" HorizontalAlignment="Stretch" Margin="0,2" Background="Transparent"
+                                                                                PointerEntered="HyperLink_OnPointerEntered" PointerExited="HyperLink_OnPointerExited">
                                                                                 <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding title}"
                                                                                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,56,0"
                                                                                    Foreground="{ThemeResource TextFillColorPrimary}"/>
@@ -383,10 +386,11 @@
                                                     <ItemsControl ItemsSource="{x:Bind regionShared:LauncherConfig.regionNewsProp.articlePanel.Notices}">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
-                                                                <Button HorizontalAlignment="Stretch" Tag="{Binding url}" Click="OpenButtonLinkFromTag">
+                                                                <Button HorizontalAlignment="Stretch" Tag="{Binding url}" Click="OpenButtonLinkFromTag" Loaded="SetHandCursor">
                                                                     <Button.Template>
                                                                         <ControlTemplate>
-                                                                            <Grid ToolTipService.ToolTip="{Binding title}" HorizontalAlignment="Stretch" Margin="0,2">
+                                                                            <Grid ToolTipService.ToolTip="{Binding title}" HorizontalAlignment="Stretch" Margin="0,2" Background="Transparent"
+                                                                                PointerEntered="HyperLink_OnPointerEntered" PointerExited="HyperLink_OnPointerExited">
                                                                                 <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding title}"
                                                                                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,56,0"
                                                                                    Foreground="{ThemeResource TextFillColorPrimary}"/>
@@ -426,10 +430,11 @@
                                                     <ItemsControl ItemsSource="{x:Bind regionShared:LauncherConfig.regionNewsProp.articlePanel.Info}">
                                                         <ItemsControl.ItemTemplate>
                                                             <DataTemplate>
-                                                                <Button HorizontalAlignment="Stretch" Tag="{Binding url}" Click="OpenButtonLinkFromTag">
+                                                                <Button HorizontalAlignment="Stretch" Tag="{Binding url}" Click="OpenButtonLinkFromTag" Loaded="SetHandCursor">
                                                                     <Button.Template>
                                                                         <ControlTemplate>
-                                                                            <Grid ToolTipService.ToolTip="{Binding title}" HorizontalAlignment="Stretch" Margin="0,2">
+                                                                            <Grid ToolTipService.ToolTip="{Binding title}" HorizontalAlignment="Stretch" Margin="0,2" Background="Transparent"
+                                                                                PointerEntered="HyperLink_OnPointerEntered" PointerExited="HyperLink_OnPointerExited">
                                                                                 <TextBlock TextTrimming="CharacterEllipsis" Text="{Binding title}"
                                                                                    HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,56,0"
                                                                                    Foreground="{ThemeResource TextFillColorPrimary}"/>
@@ -474,13 +479,13 @@
                             <ProgressRing x:Name="progressRingAcrBG" Value="{Binding Value, ElementName=progressRing}"
                                           IsIndeterminate="{Binding IsIndeterminate, ElementName=progressRing}" HorizontalAlignment="Center"
                                           VerticalAlignment="Center" Width="250" Height="250" Maximum="{Binding Maximum, ElementName=progressRing}"/>
-                            <Ellipse x:Name="progressRingBG" HorizontalAlignment="Stretch" Fill="{ThemeResource ProgressAcrylicBrush}" VerticalAlignment="Stretch" Margin="4"/>
+                            <Ellipse x:Name="progressRingBG" HorizontalAlignment="Stretch" Fill="{ThemeResource ProgressBackgroundAcrylicBrush}" VerticalAlignment="Stretch" Margin="4"/>
                             <ProgressRing x:Name="progressRing" Value="0" IsIndeterminate="True" HorizontalAlignment="Center" VerticalAlignment="Center" Width="250" Height="250" Maximum="100"/>
                             <Grid x:Name="progressPerFile" Visibility="Collapsed">
                                 <ProgressRing x:Name="progressRingAcrBG2"  Value="{Binding Value, ElementName=progressRingPerFile}"
                                           IsIndeterminate="{Binding IsIndeterminate, ElementName=progressRingPerFile}" HorizontalAlignment="Center"
                                           VerticalAlignment="Center" Width="194" Height="194" Maximum="{Binding Maximum, ElementName=progressRingPerFile}"/>
-                                <Ellipse x:Name="progressRingBG2" HorizontalAlignment="Stretch" Fill="{ThemeResource ProgressAcrylicBrush}" VerticalAlignment="Stretch" Margin="4" Width="220" Height="220"/>
+                                <Ellipse x:Name="progressRingBG2" HorizontalAlignment="Stretch" Fill="{ThemeResource ProgressBackgroundAcrylicBrush}" VerticalAlignment="Stretch" Margin="4" Width="220" Height="220"/>
                                 <ProgressRing x:Name="progressRingPerFile" Value="0" IsIndeterminate="True" HorizontalAlignment="Center" VerticalAlignment="Center" Width="214" Height="214" Maximum="100"/>
                             </Grid>
                         </Grid>

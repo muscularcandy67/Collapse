@@ -85,13 +85,13 @@ namespace CollapseLauncher
         private static readonly HttpClient _client = new HttpClient(new HttpClientHandler
         {
             AllowAutoRedirect = true,
-            UseCookies = true,
             MaxConnectionsPerServer = 16,
             AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate | DecompressionMethods.Brotli | DecompressionMethods.None
         })
         {
             DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrLower,
-            DefaultRequestVersion = HttpVersion.Version20
+            DefaultRequestVersion = HttpVersion.Version20,
+            Timeout = TimeSpan.FromSeconds(5)
         };
         public static event EventHandler<DownloadEvent> DownloadProgress;
 
@@ -268,11 +268,20 @@ namespace CollapseLauncher
             return CDNList[cdnIndex];
         }
 
-        public static async Task<T> DownloadAsJSONType<T>(string URL, JsonSerializerContext context, CancellationToken token) =>
-            await _client.GetFromJsonAsync<T>(URL, new JsonSerializerOptions()
+        public static async Task<T> DownloadAsJSONType<T>(string URL, JsonSerializerContext context, CancellationToken token)
+#if NET7_0_OR_GREATER
+            => await _client.GetFromJsonAsync<T>(URL, new JsonSerializerOptions()
             {
                 TypeInfoResolver = context
             }, token);
+#else
+        {
+            using (BridgedNetworkStream content = await GetHttpStreamFromResponse(URL, token))
+            {
+                return (T)await JsonSerializer.DeserializeAsync(content, typeof(T), context, token);
+            }
+        }
+#endif
 
         public static async ValueTask<HttpResponseMessage> GetURLHttpResponse(string URL, CancellationToken token)
         {

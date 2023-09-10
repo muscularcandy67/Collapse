@@ -19,14 +19,6 @@ namespace CollapseLauncher.CustomControls
         public ContentDialogCollapse(ContentDialogTheme theme = ContentDialogTheme.Warning)
             : base()
         {
-            /*
-            bool IsLight = InnerLauncherConfig.CurrentAppTheme switch
-            {
-                AppThemeMode.Dark => false,
-                AppThemeMode.Light => true,
-                _ => InnerLauncherConfig.SystemAppTheme.ToString() == "#FFFFFFFF"
-            };
-            */
             Theme = theme;
             NColor titleColor = (Theme switch
             {
@@ -55,7 +47,7 @@ namespace CollapseLauncher.CustomControls
                 titleStack.Children.Add(new FontIcon
                 {
                     Glyph = ThemeTitleGlyph,
-                    Foreground = (SolidColorBrush)Application.Current.Resources["DefaultFGColorAccent"],
+                    Foreground = (SolidColorBrush)Application.Current.Resources["DefaultFGColorAccentBrush"],
                     Margin = new Thickness(0, 0, 10, 0),
                     FontFamily = (FontFamily)Application.Current.Resources["FontAwesomeSolid"],
                     FontSize = 22

@@ -9,23 +9,25 @@ using Hi3Helper.Shared.ClassStruct;
 #if !DISABLEDISCORD
 using Hi3Helper.DiscordPresence;
 #endif
+using Microsoft.UI.Input;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.Win32;
+using PhotoSauce.MagicScaler;
 using System;
-using System.IO;
-using System.Text;
-using System.Linq;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Windows.UI.Text;
 using static CollapseLauncher.Dialogs.SimpleDialogs;
 using static CollapseLauncher.InnerLauncherConfig;
@@ -33,6 +35,10 @@ using static Hi3Helper.Data.ConverterTool;
 using static Hi3Helper.Locale;
 using static Hi3Helper.Logger;
 using static Hi3Helper.Shared.Region.LauncherConfig;
+using Brush = Microsoft.UI.Xaml.Media.Brush;
+using FontFamily = Microsoft.UI.Xaml.Media.FontFamily;
+using Image = Microsoft.UI.Xaml.Controls.Image;
+using Orientation = Microsoft.UI.Xaml.Controls.Orientation;
 
 namespace CollapseLauncher.Pages
 {
@@ -137,12 +143,68 @@ namespace CollapseLauncher.Pages
         #endregion
 
         #region EventPanel
-        private void TryLoadEventPanelImage()
+        private async void TryLoadEventPanelImage()
         {
+            // If the region event panel property is null, then return
             if (regionNewsProp.eventPanel == null) return;
 
+            // Get the cached filename and path
+            string cachedFileHash = BytesToCRC32Simple(regionNewsProp.eventPanel.icon);
+            string cachedFilePath = Path.Combine(AppGameImgCachedFolder, cachedFileHash);
+
+            // Create a cached image folder if not exist
+            if (!Directory.Exists(AppGameImgCachedFolder))
+                Directory.CreateDirectory(AppGameImgCachedFolder);
+
+            // Init BitmapImage to load the image and the info for cached event icon file
+            BitmapImage source = new BitmapImage();
+            FileInfo cachedIconFileInfo = new FileInfo(cachedFilePath);
+
+            // Determine if the cache icon exist and the file is completed (more than 1kB in size)
+            bool isCacheIconExist = cachedIconFileInfo.Exists && cachedIconFileInfo.Length > 1 << 10;
+
+            // Using the original icon file and cached icon file streams
+            if (!isCacheIconExist)
+            {
+                using (Stream cachedIconFileStream = cachedIconFileInfo.Create())
+                using (Stream copyIconFileStream = new MemoryStream())
+                await using (Stream iconFileStream = await FallbackCDNUtil.GetHttpStreamFromResponse(regionNewsProp.eventPanel.icon, PageToken.Token))
+                {
+                    // Copy remote stream to memory stream
+                    await iconFileStream.CopyToAsync(copyIconFileStream);
+                    copyIconFileStream.Position = 0;
+                    // Get the icon image information and set the resized frame size
+                    ImageFileInfo iconImageInfo = await Task.Run(() => ImageFileInfo.Load(copyIconFileStream));
+                    int width = (int)(iconImageInfo.Frames[0].Width * m_appDPIScale);
+                    int height = (int)(iconImageInfo.Frames[0].Height * m_appDPIScale);
+                    ProcessImageSettings settings = new ProcessImageSettings
+                    {
+                        Width = width,
+                        Height = height,
+                        HybridMode = HybridScaleMode.Off,
+                        Interpolation = InterpolationSettings.Cubic
+                    };
+
+                    copyIconFileStream.Position = 0; // Reset the original icon stream position
+                    await Task.Run(() => MagicImageProcessor.ProcessImage(copyIconFileStream, cachedIconFileStream, settings)); // Start resizing
+                    cachedIconFileStream.Position = 0; // Reset the cached icon stream position
+
+                    // Set the source from cached icon stream
+                    source.SetSource(cachedIconFileStream.AsRandomAccessStream());
+                }
+            }
+            else
+            {
+                using (Stream cachedIconFileStream = cachedIconFileInfo.OpenRead())
+                {
+                    // Set the source from cached icon stream
+                    source.SetSource(cachedIconFileStream.AsRandomAccessStream());
+                }
+            }
+
+            // Set event icon props
             ImageEventImgGrid.Visibility = !NeedShowEventIcon ? Visibility.Collapsed : Visibility.Visible;
-            ImageEventImg.Source = new BitmapImage(new Uri(regionNewsProp.eventPanel.icon));
+            ImageEventImg.Source = source;
             ImageEventImg.Tag = regionNewsProp.eventPanel.url;
 
             if (IsCustomBG)
@@ -635,7 +697,7 @@ namespace CollapseLauncher.Pages
             {
                 while (!Token.IsCancellationRequested)
                 {
-                    while (App.IsGameRunning)
+                    while (CurrentGameProperty.IsGameRunning)
                     {
                         if (StartGameBtn.IsEnabled)
                             LauncherBtn.Translation -= Shadow16;
@@ -1050,21 +1112,28 @@ namespace CollapseLauncher.Pages
 
                 StartPlaytimeCounter(CurrentGameProperty._GameVersion.GamePreset.ConfigRegistryLocation, proc, CurrentGameProperty._GameVersion.GamePreset);
                 AutoUpdatePlaytimeCounter(true, PlaytimeToken.Token);
-                
+
                 if (GetAppConfigValue("LowerCollapsePrioOnGameLaunch").ToBool())
                     CollapsePrioControl(proc);
 
                 // Set game process priority to Above Normal when GameBoost is on
                 if (_Settings.SettingsCollapseMisc.UseGameBoost)
                 {
-                    await Task.Delay(20000); // wait for possible other process to spawn
-                    Process gameProcess = new Process();
-                    var gameProcessName = Process.GetProcessesByName(proc.ProcessName.Split('.')[0]);
-                    foreach (var p in gameProcessName)
+                    // Init new target process
+                    Process toTargetProc;
+
+                    // Try catching the non-zero MainWindowHandle pointer and assign it to "toTargetProc" variable by using GetGameProcessWithActiveWindow()
+                    while ((toTargetProc = CurrentGameProperty.GetGameProcessWithActiveWindow()) == null)
                     {
-                        proc.PriorityClass = ProcessPriorityClass.AboveNormal;
-                        LogWriteLine($"Game process {proc.ProcessName} [{proc.Id}] priority is boosted to above normal!", LogType.Warning, true);
+                        await Task.Delay(1000); // Waiting the process to be found and assigned to "toTargetProc" variable.
+                                                // This is where the magic happen. When the "toTargetProc" doesn't meet the comparison to be compared as null,
+                                                // it will instead returns a non-null value and assign it to "toTargetProc" variable,
+                                                // which it will break the loop and execute the next code below it.
                     }
+
+                    // Assign the priority to the process and write a log (just for displaying any info)
+                    toTargetProc.PriorityClass = ProcessPriorityClass.AboveNormal;
+                    LogWriteLine($"Game process {toTargetProc.ProcessName} [{toTargetProc.Id}] priority is boosted to above normal!", LogType.Warning, true);
                 }
             }
             catch (System.ComponentModel.Win32Exception ex)
@@ -1291,7 +1360,11 @@ namespace CollapseLauncher.Pages
                     {
                         while (!reader.EndOfStream)
                         {
+#if NET7_0_OR_GREATER
                             line = await reader.ReadLineAsync(WatchOutputLog.Token);
+#else
+                            line = await reader.ReadLineAsync();
+#endif
                             if (RequireWindowExclusivePayload && line == "MoleMole.MonoGameEntry:Awake()")
                             {
                                 StartExclusiveWindowPayload();
@@ -1317,14 +1390,14 @@ namespace CollapseLauncher.Pages
         private async void GameLogWatcher()
         {
             await Task.Delay(5000);
-            while (App.IsGameRunning)
+            while (CurrentGameProperty.IsGameRunning)
             {
                 await Task.Delay(3000);
             }
 
             WatchOutputLog.Cancel();
         }
-        #endregion
+#endregion
 
         #region Open Button Method
         private void OpenGameFolderButton_Click(object sender, RoutedEventArgs e)
@@ -1403,15 +1476,15 @@ namespace CollapseLauncher.Pages
 
         private async void StopGameButton_Click(object sender, RoutedEventArgs e)
         {
-           if (await Dialog_StopGame(this) != ContentDialogResult.Primary) return;
-           StopGame(CurrentGameProperty._GameVersion.GamePreset);
+            if (await Dialog_StopGame(this) != ContentDialogResult.Primary) return;
+            StopGame(CurrentGameProperty._GameVersion.GamePreset);
         }
         #endregion
 
         #region Playtime Buttons
         private void ForceUpdatePlaytimeButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!App.IsGameRunning)
+            if (!CurrentGameProperty.IsGameRunning)
             {
                 UpdatePlaytime();
             }
@@ -1567,7 +1640,7 @@ namespace CollapseLauncher.Pages
 
                 if (!dynamicUpdate)
                 {
-                    while (App.IsGameRunning) { }
+                    while (CurrentGameProperty.IsGameRunning) { }
                     UpdatePlaytime();
                     return;
                 }
@@ -1576,7 +1649,7 @@ namespace CollapseLauncher.Pages
 
                 if (bootByCollapse)
                 {
-                    while (App.IsGameRunning)
+                    while (CurrentGameProperty.IsGameRunning)
                     {
                         await Task.Delay(60000, token);
                         elapsedSeconds += 60;
@@ -1586,7 +1659,7 @@ namespace CollapseLauncher.Pages
                     return;
                 }
 
-                if (App.IsGameRunning)
+                if (CurrentGameProperty.IsGameRunning)
                 {
                     await Task.Delay(60000, token);
                     int newTime = ReadPlaytimeFromRegistry(regionKey);
@@ -1596,7 +1669,7 @@ namespace CollapseLauncher.Pages
 
                 }
 
-                while (App.IsGameRunning)
+                while (CurrentGameProperty.IsGameRunning)
                 {
                     UpdatePlaytime(false, oldTime + elapsedSeconds);
                     elapsedSeconds += 60;
@@ -1671,6 +1744,30 @@ namespace CollapseLauncher.Pages
                 CurrentGameProperty._GameInstall.Flush();
                 ReturnToHomePage();
             }
+        }
+        #endregion
+
+        #region Set Hand Cursor
+        public static void ChangeCursor(UIElement element, InputCursor cursor)
+        {
+            typeof(UIElement).InvokeMember("ProtectedCursor", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SetProperty | BindingFlags.Instance, null, element, new object[] { cursor });
+        }
+
+        private void SetHandCursor(object sender, RoutedEventArgs e = null)
+        {
+            ChangeCursor((UIElement)sender, InputSystemCursor.Create(InputSystemCursorShape.Hand));
+        }
+        #endregion
+
+        #region Hyper Link Color
+        private void HyperLink_OnPointerEntered(object sender, PointerRoutedEventArgs e)
+        {
+            ((TextBlock)((Grid)sender).Children[0]).Foreground = (Brush)Application.Current.Resources["AccentColor"];
+        }
+
+        private void HyperLink_OnPointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            ((TextBlock)((Grid)sender).Children[0]).Foreground = (Brush)Application.Current.Resources["TextFillColorPrimaryBrush"];
         }
         #endregion
 

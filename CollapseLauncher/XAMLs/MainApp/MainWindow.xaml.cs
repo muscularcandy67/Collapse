@@ -133,17 +133,16 @@ namespace CollapseLauncher
                 m_presenter.IsResizable = false;
                 m_presenter.IsMaximizable = false;
 
-                switch (GetAppTheme())
+                if (IsAppThemeLight)
                 {
-                    case ApplicationTheme.Light:
-                        m_appWindow.TitleBar.ButtonForegroundColor = new Windows.UI.Color { A = 255, B = 0, G = 0, R = 0 };
-                        m_appWindow.TitleBar.ButtonInactiveForegroundColor = new Windows.UI.Color { A = 0, B = 160, G = 160, R = 160 };
-                        m_appWindow.TitleBar.ButtonHoverBackgroundColor = new Windows.UI.Color { A = 64, B = 0, G = 0, R = 0 };
-                        break;
-                    case ApplicationTheme.Dark:
-                        m_appWindow.TitleBar.ButtonForegroundColor = new Windows.UI.Color { A = 255, B = 255, G = 255, R = 255 };
-                        m_appWindow.TitleBar.ButtonHoverBackgroundColor = new Windows.UI.Color { A = 64, B = 0, G = 0, R = 0 };
-                        break;
+                    m_appWindow.TitleBar.ButtonForegroundColor = new Windows.UI.Color { A = 255, B = 0, G = 0, R = 0 };
+                    m_appWindow.TitleBar.ButtonInactiveForegroundColor = new Windows.UI.Color { A = 0, B = 160, G = 160, R = 160 };
+                    m_appWindow.TitleBar.ButtonHoverBackgroundColor = new Windows.UI.Color { A = 64, B = 0, G = 0, R = 0 };
+                }
+                else
+                {
+                    m_appWindow.TitleBar.ButtonForegroundColor = new Windows.UI.Color { A = 255, B = 255, G = 255, R = 255 };
+                    m_appWindow.TitleBar.ButtonHoverBackgroundColor = new Windows.UI.Color { A = 64, B = 0, G = 0, R = 0 };
                 }
 
                 m_appWindow.TitleBar.ButtonBackgroundColor = new Windows.UI.Color { A = 0, B = 0, G = 0, R = 0 };
@@ -169,16 +168,7 @@ namespace CollapseLauncher
 
         private void SetLegacyTitleBarColor()
         {
-            switch (GetAppTheme())
-            {
-                case ApplicationTheme.Light:
-                    Application.Current.Resources["WindowCaptionForeground"] = new Windows.UI.Color { A = 255, B = 0, G = 0, R = 0 };
-                    break;
-                case ApplicationTheme.Dark:
-                    Application.Current.Resources["WindowCaptionForeground"] = new Windows.UI.Color { A = 255, B = 255, G = 255, R = 255 };
-                    break;
-            }
-
+            Application.Current.Resources["WindowCaptionForeground"] = IsAppThemeLight ? new Windows.UI.Color { A = 255, B = 0, G = 0, R = 0 } : new Windows.UI.Color { A = 255, B = 255, G = 255, R = 255 };
             Application.Current.Resources["WindowCaptionBackground"] = new SolidColorBrush(new Windows.UI.Color { A = 0, B = 0, G = 0, R = 0 });
             Application.Current.Resources["WindowCaptionBackgroundDisabled"] = new SolidColorBrush(new Windows.UI.Color { A = 0, B = 0, G = 0, R = 0 });
         }
@@ -253,19 +243,24 @@ namespace CollapseLauncher
             if (_eventWindowPosChange != null) m_appWindow.Changed -= _eventWindowPosChange;
             _eventWindowPosChange = (sender, args) =>
             {
-                if (args.DidSizeChange && args.DidPositionChange)
+                if (args.DidSizeChange && args.DidPositionChange
+                && !args.DidPresenterChange)
                 {
                     lock (this)
                     {
-                        // m_presenter.Restore();
                         AssignCurrentWindowPosition(hwnd);
-                        sender.MoveAndResize(new RectInt32
+                        if (m_windowPosSize.X > (_lastWindowWidth * -1)
+                         && m_windowPosSize.Y > (_lastWindowHeight * -1))
                         {
-                            Width = _lastWindowWidth,
-                            Height = _lastWindowHeight,
-                            X = (int)m_windowPosSize.X,
-                            Y = (int)m_windowPosSize.Y
-                        });
+                            m_presenter.Restore();
+                            sender.MoveAndResize(new RectInt32
+                            {
+                                Width = _lastWindowWidth,
+                                Height = _lastWindowHeight,
+                                X = (int)m_windowPosSize.X,
+                                Y = (int)m_windowPosSize.Y
+                            });
+                        }
                     }
                 }
             };
