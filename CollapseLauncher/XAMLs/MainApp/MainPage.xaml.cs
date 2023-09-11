@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics;
 using static CollapseLauncher.InnerLauncherConfig;
+using static CollapseLauncher.RegionResourceListHelper;
 using static CollapseLauncher.Statics.GamePropertyVault;
 using static CollapseLauncher.Dialogs.KeyboardShortcuts;
 using static Hi3Helper.Locale;
