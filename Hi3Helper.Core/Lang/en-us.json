@@ -391,7 +391,7 @@
     "AppChangeReleaseChannel": "Change to {0} Release Channel",
 
     "EnableAcrylicEffect": "Use Acrylic Blur Effect",
-    "LowerCollapsePrioOnGameLaunch": "Lower Collapse process priority when a game is launched"
+    "LowerCollapsePrioOnGameLaunch": "Lower Collapse process priority when a game is launched",
     "EnableDownloadChunksMerging": "Merge Downloaded Package Chunks",
     "KbShortcuts_Title": "Keyboard Shortcuts",
     "KbShortcuts_ShowBtn": "Show Shortcuts",
