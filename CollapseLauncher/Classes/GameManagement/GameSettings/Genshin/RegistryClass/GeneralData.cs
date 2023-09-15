@@ -408,7 +408,10 @@ namespace CollapseLauncher.GameSettings.Genshin
                     $"\r\n      Audio - Voice Volume : {volumeVoice}" +
                     $"\r\n      Audio - Dynamic Range: {audioDynamicRange}" +
                     $"\r\n      Audio - Surround     : {audioOutput}" +
-                    $"\r\n      Gamma                : {gammaValue}", LogType.Debug);
+                    $"\r\n      Gamma                : {gammaValue}" +
+                    $"\r\n      HDR - MaxLuminosity  : {maxLuminosity}" +
+                    $"\r\n      HDR - UIPaperWhite   : {uiPaperWhite}" +
+                    $"\r\n      HDR - ScenePaperWhite: {scenePaperWhite}", LogType.Debug);
 #else
                 LogWriteLine($"Saved Genshin Game Settings", LogType.Default, true);
 #endif
@@ -420,7 +423,6 @@ namespace CollapseLauncher.GameSettings.Genshin
         }
 
         public bool Equals(GeneralData? comparedTo) => TypeExtensions.IsInstancePropertyEqual(this, comparedTo);
-#nullable disable
         #endregion
     }
 }
