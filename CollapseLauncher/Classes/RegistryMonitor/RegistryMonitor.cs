@@ -169,7 +169,6 @@ namespace RegistryUtils
                 new Exception($"Error in RegistryMonitor Dispose routine!\r\n{ex}");
             }
             _disposed = true;
-            // GC.SuppressFinalize(this);
 #if DEBUG
             LogWriteLine($"RegistryMonitor Disposed!", Hi3Helper.LogType.Debug, true);
 #endif
@@ -302,8 +301,7 @@ namespace RegistryUtils
         /// </summary>
         public void Stop()
         {
-            if (_disposed)
-                throw new ObjectDisposedException(null, "This instance is already disposed");
+            if (_disposed) return;
 
             lock (_threadLock)
             {
