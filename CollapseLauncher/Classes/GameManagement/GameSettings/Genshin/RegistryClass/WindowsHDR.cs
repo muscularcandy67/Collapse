@@ -1,4 +1,4 @@
-﻿using CollapseLauncher.Interfaces;
+using CollapseLauncher.Interfaces;
 using Hi3Helper;
 using Hi3Helper.EncTool;
 using Microsoft.Win32;
@@ -22,19 +22,7 @@ namespace CollapseLauncher.GameSettings.Genshin
         /// </summary>
         public int HDR { get; set; } = 0;
 
-        public bool isHDR
-        {
-            get => HDR switch
-            {
-                1 => true,
-                _ => false,
-            };
-            set => HDR = value switch
-            {
-                true => 1,
-                _ => 0,
-            };
-        }
+        public bool isHDR { get => HDR == 1; set => HDR = value ? 1 : 0; }
         #endregion
 
         #region Methods

@@ -14,43 +14,51 @@
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<StartupObject>CollapseLauncher.MainEntryPoint</StartupObject>
 		<EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
-		<ResourceLanguages>en</ResourceLanguages>
-		<SatelliteResourceLanguages>en-US;en</SatelliteResourceLanguages>
+		<InvariantGlobalization>true</InvariantGlobalization>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<TieredCompilation>true</TieredCompilation>
 		<TieredCompilationQuickJit>true</TieredCompilationQuickJit>
 		<TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
 		<TieredPGO>true</TieredPGO>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <GitVersion>false</GitVersion>
 	</PropertyGroup>
 <!--
   Constants List:
 		- PREVIEW : States the version is a preview branch 
 		- DISABLEDISCORD : Disable Discord RPC module
 		- SIMULATEPRELOAD : Simulate downloading preload
+		- ENABLEHTTPREPAIR : Override HTTPS download scheme to HTTP while downloading repair files
 		- SIMULATEAPPLYPRELOAD : Simulates downloading and applying preload update, regardless of current working game version (WILL BREAK GAME)
 		- DUMPGIJSON : Dumps Genshin Impact GeneralData JSON registry into console (CPU INTENSIVE LOAD!)
 -->
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN;PREVIEW;DUMPGIJSON</DefineConstants>
+		<DefineConstants>DISABLE_XAML_GENERATED_MAIN;ENABLEHTTPREPAIR;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION;PREVIEW;SIMULATEAPPLYPRELOAD;DUMPGIJSON</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN;PREVIEW</DefineConstants>
+		<DefineConstants>DISABLE_XAML_GENERATED_MAIN;ENABLEHTTPREPAIR;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION;PREVIEW</DefineConstants>
 		<Optimize>True</Optimize>
+    <GitSkipCache>true</GitSkipCache>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Publish|x64'">
-		<DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+		<DefineConstants>DISABLE_XAML_GENERATED_MAIN;ENABLEHTTPREPAIR;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION</DefineConstants>
 		<Optimize>True</Optimize>
+    <GitSkipCache>true</GitSkipCache>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Clowd.Squirrel" Version="2.9.42" />
 		<PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
+		<PackageReference Include="GitInfo" Version="3.3.3">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.0.3" />
 		<PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.4.230822000" />
 		<PackageReference Include="PhotoSauce.MagicScaler" Version="0.13.2" />
-		<PackageReference Include="System.CommandLine" Version="2.0.0-beta3.22114.1" />
+		<PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+		<PackageReference Include="System.CommandLine.NamingConventionBinder" Version="2.0.0-beta4.22272.1" />
 		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
 	</ItemGroup>
 
@@ -115,12 +123,15 @@
 			<TrimmableAssembly Include="PhotoSauce.MagicScaler" />
 			<TrimmableAssembly Include="SquirrelLib" />
 			<TrimmableAssembly Include="SharpCompress" />
+      <TrimmableAssembly Include="System.CommandLine" />
+      <TrimmableAssembly Include="System.CommandLine.NamingConventionBinder" />
 			<TrimmableAssembly Include="System.Drawing" />
 			<TrimmableAssembly Include="System.Drawing.Common" />
 			<TrimmableAssembly Include="System.Drawing.Primitives" />
 			<TrimmableAssembly Include="System.IO.Compression.Brotli" />
 			<TrimmableAssembly Include="System.IO.Compression" />
 			<TrimmableAssembly Include="WinRT.Runtime" />
+      <TrimmableAssembly Include="GitInfo" />
 		</ItemGroup>
 	</Target>
 </Project>
