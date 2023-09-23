@@ -179,7 +179,7 @@ namespace Hi3Helper.Shared.Region
             { "IncludeGameLogs", false },
             { "UseDownloadChunksMerging", false },
             { "LowerCollapsePrioOnGameLaunch", false },
-            { "EnableHTTPRepairOverride", true }
+            { "EnableHTTPRepairOverride", false }
         };
 
         public static void LoadGamePreset()

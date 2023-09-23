@@ -1,4 +1,3 @@
-using CollapseLauncher.Interfaces;
 using Hi3Helper;
 using Hi3Helper.EncTool;
 using Microsoft.Win32;
