@@ -1165,18 +1165,29 @@ namespace CollapseLauncher.InstallManager.Base
 
             // If the file exist or package size is unmatched,
             // then start downloading
-            FileInfo packageOutInfo = new FileInfo(package.PathOutput);
-            if (!packageOutInfo.Exists
-              || packageOutInfo.Length != package.SizeDownloaded)
+            long existingPackageFileSize = package.GetStreamLength(_downloadThreadCount);
+            bool isExistingPackageFileExist = package.IsReadStreamExist(_downloadThreadCount);
+
+            if (!isExistingPackageFileExist
+              || existingPackageFileSize != package.Size)
             {
-                await _httpClient.Download(package.URL, package.PathOutput, _downloadThreadCount, false, token);
+                // If the package size is more than or equal to 10 MB, then allow to use multi-session.
+                // Otherwise, forcefully use single-session.
+                bool isCanMultiSession;
+                if (isCanMultiSession = package.Size >= (10 << 20))
+                    await _httpClient.Download(package.URL, package.PathOutput, _downloadThreadCount, false, token);
+                else
+                    await _httpClient.Download(package.URL, package.PathOutput, false, null, null, token);
+
+                // Update status to merging
                 _status.ActivityStatus = string.Format("{0}: {1}", Lang._Misc.Merging, string.Format(Lang._Misc.PerFromTo, _progressTotalCountCurrent, _progressTotalCount));
                 UpdateStatus();
                 _stopwatch.Stop();
-                if (_canMergeDownloadChunks)
-                {
+
+                // Check if the merge chunk is enabled and the download could perform multisession,
+                // then do merge.
+                if (_canMergeDownloadChunks && isCanMultiSession)
                     await _httpClient.Merge();
-                }
                 _stopwatch.Start();
             }
 

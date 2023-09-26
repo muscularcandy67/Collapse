@@ -392,13 +392,9 @@ namespace CollapseLauncher
                 }))
                 await using (Stream netStream = await FallbackCDNUtil.DownloadAsStream(URL, token))
                     await netStream.CopyToAsync(fs, token);
-
 #if DEBUG
-                LogWriteLine
-#else
-            LogWrite
+                LogWriteLine($"Downloaded the cached asset from: {URL} is completed! (Stored to: cached\\{fInfo.Name})", LogType.Debug, true);
 #endif
-                ($"Downloaded the cached asset from: {URL} is completed! (Stored to: cached\\{fInfo.Name})", LogType.Debug, true);
             }
             catch (Exception ex)
             {
@@ -534,6 +530,8 @@ namespace CollapseLauncher
         private async void ChangeRegionNoWarning(object sender, RoutedEventArgs e)
         {
             (sender as Button).IsEnabled = false;
+            CurrentGameCategory = ComboBoxGameCategory.SelectedIndex;
+            CurrentGameRegion = ComboBoxGameRegion.SelectedIndex;
             await LoadRegionRootButton();
             HideLoadingPopup(true, Lang._MainPage.RegionLoadingTitle, RegionToChangeName);
             MainFrameChanger.ChangeMainFrame(m_appMode == AppMode.Hi3CacheUpdater ? typeof(CachesPage) : typeof(HomePage));
@@ -548,6 +546,8 @@ namespace CollapseLauncher
             {
                 // Finalize loading
                 ToggleChangeRegionBtn(sender, false);
+                CurrentGameCategory = ComboBoxGameCategory.SelectedIndex;
+                CurrentGameRegion = ComboBoxGameRegion.SelectedIndex;
             }
         }
 
