@@ -41,6 +41,7 @@ namespace Hi3Helper
 
                 public string Audio_Output_Surround { get; set; } = LangFallback?._GenshinGameSettingsPage.Audio_Output_Surround;
                 public string Audio_DynamicRange { get; set; } = LangFallback?._GenshinGameSettingsPage.Audio_DynamicRange;
+                public string Audio_MuteOnMinimize { get; set; } = LangFallback?._GenshinGameSettingsPage.Audio_MuteOnMinimize;
                 #endregion
 
                 #region Graphics

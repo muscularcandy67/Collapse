@@ -314,8 +314,16 @@ namespace CollapseLauncher.Pages
         #region Graphics Settings - HDR
         public bool IsHDR
         {
-            get => Settings.SettingsWindowsHDR.isHDR;
-            set => Settings.SettingsWindowsHDR.isHDR = value;
+            get
+            {
+                if (Settings.SettingsWindowsHDR.isHDR || Settings.SettingsGeneralData.enableHDR) return true;
+                return false;
+            }
+            set
+            {
+                Settings.SettingsWindowsHDR.isHDR = value;
+                Settings.SettingsGeneralData.enableHDR = value;
+            } 
         }
 
         public double MaxLuminosity
@@ -372,6 +380,12 @@ namespace CollapseLauncher.Pages
         {
             get => Convert.ToBoolean((int)Settings.SettingsGeneralData.audioOutput);
             set => Settings.SettingsGeneralData.audioOutput = Convert.ToInt32(value);
+        }
+
+        public bool Audio_MuteOnMinimized
+        {
+            get => Settings.SettingsGeneralData.muteAudioOnAppMinimized;
+            set => Settings.SettingsGeneralData.muteAudioOnAppMinimized = value;
         }
         #endregion
 
