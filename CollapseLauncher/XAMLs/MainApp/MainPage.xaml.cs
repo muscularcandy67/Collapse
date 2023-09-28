@@ -211,8 +211,8 @@ namespace CollapseLauncher
             ErrorSenderInvoker.ExceptionEvent += ErrorSenderInvoker_ExceptionEvent;
             MainFrameChangerInvoker.FrameEvent += MainFrameChangerInvoker_FrameEvent;
             NotificationInvoker.EventInvoker += NotificationInvoker_EventInvoker;
-            BackgroundImgChangerInvoker.ImgEvent += CustomBackgroundChanger_Event;
-            BackgroundImgChangerInvoker.IsImageHide += BackgroundImg_IsImageHideEvent;
+            BackgroundMediaChangerInvoker.MediaEvent += CustomBackgroundChanger_Event;
+            BackgroundMediaChangerInvoker.IsMediaHidden += BackgroundImgIsMediaHiddenEvent;
             SpawnWebView2Invoker.SpawnEvent += SpawnWebView2Invoker_SpawnEvent;
             ShowLoadingPageInvoker.PageEvent += ShowLoadingPageInvoker_PageEvent;
             ChangeTitleDragAreaInvoker.TitleBarEvent += ChangeTitleDragAreaInvoker_TitleBarEvent;
@@ -220,15 +220,15 @@ namespace CollapseLauncher
             Dialogs.KeyboardShortcuts.KeyboardShortcutsEvent += SettingsPage_KeyboardShortcutsEvent;
         }
 
-        private void BackgroundImg_IsImageHideEvent(object sender, bool e) => HideBackgroundImage(e);
+        private void BackgroundImgIsMediaHiddenEvent(object sender, bool e) => HideBackgroundImage(e);
 
         private void UnsubscribeEvents()
         {
             ErrorSenderInvoker.ExceptionEvent -= ErrorSenderInvoker_ExceptionEvent;
             MainFrameChangerInvoker.FrameEvent -= MainFrameChangerInvoker_FrameEvent;
             NotificationInvoker.EventInvoker -= NotificationInvoker_EventInvoker;
-            BackgroundImgChangerInvoker.ImgEvent -= CustomBackgroundChanger_Event;
-            BackgroundImgChangerInvoker.IsImageHide -= BackgroundImg_IsImageHideEvent;
+            BackgroundMediaChangerInvoker.MediaEvent -= CustomBackgroundChanger_Event;
+            BackgroundMediaChangerInvoker.IsMediaHidden -= BackgroundImgIsMediaHiddenEvent;
             SpawnWebView2Invoker.SpawnEvent -= SpawnWebView2Invoker_SpawnEvent;
             ShowLoadingPageInvoker.PageEvent -= ShowLoadingPageInvoker_PageEvent;
             ChangeTitleDragAreaInvoker.TitleBarEvent -= ChangeTitleDragAreaInvoker_TitleBarEvent;
@@ -251,7 +251,7 @@ namespace CollapseLauncher
 
         private void ShowLoadingPageInvoker_PageEvent(object sender, ShowLoadingPageProperty e)
         {
-            BackgroundImgChanger.ToggleBackground(e.Hide);
+            BackgroundMediaChanger.ToggleBackground(e.Hide);
             HideLoadingPopup(e.Hide, e.Title, e.Subtitle);
         }
 
@@ -266,32 +266,50 @@ namespace CollapseLauncher
             SpawnWebView2Panel(new Uri(e.URL));
         }
 
-        private async void CustomBackgroundChanger_Event(object sender, BackgroundImgProperty e)
+        private async void CustomBackgroundChanger_Event(object sender, BackgroundMediaProperty e)
         {
-            e.IsImageLoaded = false;
-            regionBackgroundProp.imgLocalPath = e.ImgPath;
+            string[] supportedVideoTypes = new[] { "mp4", "mpg", "m4v" };
+
+            e.IsMediaLoaded = false;
+            regionBackgroundProp.mediaLocalPath = e.MediaPath;
             IsCustomBG = e.IsCustom;
 
             if (e.IsCustom)
-                SetAndSaveConfigValue("CustomBGPath", regionBackgroundProp.imgLocalPath);
+                SetAndSaveConfigValue("CustomBGPath", regionBackgroundProp.mediaLocalPath);
 
-            if (!File.Exists(regionBackgroundProp.imgLocalPath))
+            if (!File.Exists(regionBackgroundProp.mediaLocalPath))
             {
-                LogWriteLine($"Custom background file {e.ImgPath} is missing!", LogType.Warning, true);
-                regionBackgroundProp.imgLocalPath = AppDefaultBG;
+                LogWriteLine($"Custom background file {e.MediaPath} is missing!", LogType.Warning, true);
+                regionBackgroundProp.mediaLocalPath = AppDefaultBG;
             }
 
-            try
+            for (int i = 0; i < supportedVideoTypes.Length; i++)
             {
-                await RunApplyBackgroundTask();
-            }
-            catch (Exception ex)
-            {
-                regionBackgroundProp.imgLocalPath = AppDefaultBG;
-                LogWriteLine($"An error occured while loading background {e.ImgPath}\r\n{ex}", LogType.Error, true);
+                if (Path.GetExtension(regionBackgroundProp.mediaLocalPath) == supportedVideoTypes[i])
+                {
+                    LogWriteLine($"[CustomBG Module] Your background is of extension " +
+                                 $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, breaking!", 
+                        LogType.Debug, false);
+                    break;
+                }
+                else
+                {
+                    try
+                    {
+                        LogWriteLine($"[CustomBG Module] Your background is of extension " +
+                                     $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, trying to " +
+                                     $"run background async task...", LogType.Debug, false);
+                        await RunApplyBackgroundTask();
+                    }
+                    catch (Exception ex)
+                    {
+                        regionBackgroundProp.mediaLocalPath = AppDefaultBG;
+                        LogWriteLine($"An error occured while loading background {e.MediaPath}\r\n{ex}", LogType.Error, true);
+                    }
+                }
+                e.IsMediaLoaded = true;
             }
 
-            e.IsImageLoaded = true;
         }
 
         private async Task RunApplyBackgroundTask()

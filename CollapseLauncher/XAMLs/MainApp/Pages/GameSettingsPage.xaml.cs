@@ -67,7 +67,7 @@ namespace CollapseLauncher.Pages
 
         private void LoadPage()
         {
-            BackgroundImgChanger.ToggleBackground(true);
+            BackgroundMediaChanger.ToggleBackground(true);
             Settings.ReloadSettings();
 
             this.InitializeComponent();

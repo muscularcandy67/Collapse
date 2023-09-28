@@ -29,7 +29,7 @@ namespace CollapseLauncher.Pages
     {
         public SettingsPage()
         {
-            BackgroundImgChanger.ToggleBackground(true);
+            BackgroundMediaChanger.ToggleBackground(true);
             this.InitializeComponent();
             LoadAppConfig();
             this.DataContext = this;
@@ -237,15 +237,15 @@ namespace CollapseLauncher.Pages
             }.Start();
         }
 
-        private async void SelectBackgroundImg(object sender, RoutedEventArgs e)
+        private async void SelectBackgroundMedia(object sender, RoutedEventArgs e)
         {
-            string file = await GetFilePicker(new Dictionary<string, string> { { "Supported formats", "*.jpg;*.jpeg;*.jfif;*.png;*.bmp;*.tiff;*.tif;*.webp" } });
+            string file = await GetFilePicker(new Dictionary<string, string> { { "Supported formats", "*.jpg;*.jpeg;*.jfif;*.png;*.bmp;*.tiff;*.tif;*.webp;*.mp4;*.mpg;*.m4v" } });
             if (file != null)
             {
-                regionBackgroundProp.imgLocalPath = file;
+                regionBackgroundProp.mediaLocalPath = file;
                 SetAndSaveConfigValue("CustomBGPath", file);
                 BGPathDisplay.Text = file;
-                BackgroundImgChanger.ChangeBackground(file);
+                BackgroundMediaChanger.ChangeBackground(file);
             }
         }
 
@@ -287,7 +287,7 @@ namespace CollapseLauncher.Pages
                 if (!value)
                 {
                     BGPathDisplay.Text = Lang._Misc.NotSelected;
-                    regionBackgroundProp.imgLocalPath = GetAppConfigValue("CurrentBackground").ToString();
+                    regionBackgroundProp.mediaLocalPath = GetAppConfigValue("CurrentBackground").ToString();
                     m_mainPage?.ChangeBackgroundImageAsRegionAsync();
                     AppBGCustomizer.Visibility = Visibility.Collapsed;
                     AppBGCustomizerNote.Visibility = Visibility.Collapsed;
@@ -297,21 +297,21 @@ namespace CollapseLauncher.Pages
                     string BGPath = GetAppConfigValue("CustomBGPath").ToString();
                     if (string.IsNullOrEmpty(BGPath))
                     {
-                        regionBackgroundProp.imgLocalPath = AppDefaultBG;
+                        regionBackgroundProp.mediaLocalPath = AppDefaultBG;
                     }
                     else
                     {
                         if (!File.Exists(BGPath))
                         {
-                            regionBackgroundProp.imgLocalPath = AppDefaultBG;
+                            regionBackgroundProp.mediaLocalPath = AppDefaultBG;
                         }
                         else
                         {
-                            regionBackgroundProp.imgLocalPath = BGPath;
+                            regionBackgroundProp.mediaLocalPath = BGPath;
                         }
                     }
-                    BGPathDisplay.Text = regionBackgroundProp.imgLocalPath;
-                    BackgroundImgChanger.ChangeBackground(regionBackgroundProp.imgLocalPath);
+                    BGPathDisplay.Text = regionBackgroundProp.mediaLocalPath;
+                    BackgroundMediaChanger.ChangeBackground(regionBackgroundProp.mediaLocalPath);
                     AppBGCustomizer.Visibility = Visibility.Visible;
                     AppBGCustomizerNote.Visibility = Visibility.Visible;
                 }

@@ -181,13 +181,13 @@ namespace CollapseLauncher
 
         private async ValueTask DownloadBackgroundImage(CancellationToken Token)
         {
-            regionBackgroundProp.imgLocalPath = Path.Combine(AppGameImgFolder, "bg", Path.GetFileName(regionBackgroundProp.data.adv.background));
-            SetAndSaveConfigValue("CurrentBackground", regionBackgroundProp.imgLocalPath);
+            regionBackgroundProp.mediaLocalPath = Path.Combine(AppGameImgFolder, "bg", Path.GetFileName(regionBackgroundProp.data.adv.background));
+            SetAndSaveConfigValue("CurrentBackground", regionBackgroundProp.mediaLocalPath);
 
             if (!Directory.Exists(Path.Combine(AppGameImgFolder, "bg")))
                 Directory.CreateDirectory(Path.Combine(AppGameImgFolder, "bg"));
 
-            FileInfo fI = new FileInfo(regionBackgroundProp.imgLocalPath);
+            FileInfo fI = new FileInfo(regionBackgroundProp.mediaLocalPath);
 
             if (fI.Exists && fI.Length >= 1 << 20) return;
 

@@ -29,16 +29,15 @@
                           CornerRadius="{TemplateBinding CornerRadius}"
                           BorderBrush="{TemplateBinding BorderBrush}"
                           BorderThickness="{TemplateBinding BorderThickness}">
-                            <Image Name="PlaceholderImage"
+                            <MediaPlayerElement Name="PlaceholderImage"
                                HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
                                VerticalAlignment="{TemplateBinding VerticalAlignment}"
                                Opacity="1.0"
                                Source="{TemplateBinding PlaceholderSource}"
                                Stretch="{TemplateBinding PlaceholderStretch}" />
-                            <Image Name="Image"
+                            <MediaPlayerElement Name="Image"
                                HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
                                VerticalAlignment="{TemplateBinding VerticalAlignment}"
-                               NineGrid="{TemplateBinding NineGrid}"
                                Opacity="0.0"
                                Stretch="{TemplateBinding Stretch}" />
                             <VisualStateManager.VisualStateGroups>

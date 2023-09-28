@@ -285,34 +285,34 @@ namespace CollapseLauncher
     }
     #endregion
     #region BackgroundRegion
-    internal static class BackgroundImgChanger
+    internal static class BackgroundMediaChanger
     {
-        static BackgroundImgChangerInvoker invoker = new BackgroundImgChangerInvoker();
+        static BackgroundMediaChangerInvoker invoker = new BackgroundMediaChangerInvoker();
         public static async Task WaitForBackgroundToLoad() => await invoker.WaitForBackgroundToLoad();
-        public static void ChangeBackground(string ImgPath, bool IsCustom = true) => invoker.ChangeBackground(ImgPath, IsCustom);
-        public static void ToggleBackground(bool Hide) => invoker.ToggleBackground(Hide);
+        public static void ChangeBackground(string MediaPath, bool IsCustom = true) => invoker.ChangeBackground(MediaPath, IsCustom);
+        public static void ToggleBackground(bool Hidden) => invoker.ToggleBackground(Hidden);
     }
 
-    internal class BackgroundImgChangerInvoker
+    internal class BackgroundMediaChangerInvoker
     {
-        public static event EventHandler<BackgroundImgProperty> ImgEvent;
-        public static event EventHandler<bool> IsImageHide;
-        BackgroundImgProperty property;
-        public async Task WaitForBackgroundToLoad() => await Task.Run(() => { while (!property.IsImageLoaded) { } });
-        public void ChangeBackground(string ImgPath, bool IsCustom) => ImgEvent?.Invoke(this, property = new BackgroundImgProperty(ImgPath, IsCustom));
-        public void ToggleBackground(bool Hide) => IsImageHide?.Invoke(this, Hide);
+        public static event EventHandler<BackgroundMediaProperty> MediaEvent;
+        public static event EventHandler<bool> IsMediaHidden;
+        BackgroundMediaProperty property;
+        public async Task WaitForBackgroundToLoad() => await Task.Run(() => { while (!property.IsMediaLoaded) { } });
+        public void ChangeBackground(string MediaPath, bool IsCustom) => MediaEvent?.Invoke(this, property = new BackgroundMediaProperty(MediaPath, IsCustom));
+        public void ToggleBackground(bool Hidden) => IsMediaHidden?.Invoke(this, Hidden);
     }
 
-    internal class BackgroundImgProperty
+    internal class BackgroundMediaProperty
     {
-        internal BackgroundImgProperty(string ImgPath, bool IsCustom)
+        internal BackgroundMediaProperty(string MediaPath, bool IsCustom)
         {
-            this.ImgPath = ImgPath;
+            this.MediaPath = MediaPath;
             this.IsCustom = IsCustom;
         }
 
-        public bool IsImageLoaded { get; set; } = false;
-        public string ImgPath { get; private set; }
+        public bool IsMediaLoaded { get; set; } = false;
+        public string MediaPath { get; private set; }
         public bool IsCustom { get; private set; }
     }
     #endregion

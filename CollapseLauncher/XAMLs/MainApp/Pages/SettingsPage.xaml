@@ -39,7 +39,7 @@
                         <StackPanel Margin="0,4,0,8" HorizontalAlignment="Left">
                             <CheckBox x:Name="AppBGMode" Content="{x:Bind helper:Locale.Lang._SettingsPage.AppBG_Checkbox}" IsChecked="{x:Bind IsBGCustom, Mode=TwoWay}"/>
                             <StackPanel x:Name="AppBGCustomizer" Orientation="Horizontal" Margin="-2,8,0,0" Visibility="Collapsed">
-                                <Button x:Name="BGSelector" IsEnabled="False" Margin="-40,0,0,0" Height="35" CornerRadius="0,16,16,0" Click="SelectBackgroundImg" Style="{ThemeResource AccentButtonStyle}">
+                                <Button x:Name="BGSelector" IsEnabled="False" Margin="-40,0,0,0" Height="35" CornerRadius="0,16,16,0" Click="SelectBackgroundMedia" Style="{ThemeResource AccentButtonStyle}">
                                     <StackPanel Orientation="Horizontal" Margin="32,0,0,0">
                                         <FontIcon FontFamily="{ThemeResource FontAwesome}" Glyph="&#xF03E;" FontSize="22"/>
                                         <TextBlock Text="{x:Bind helper:Locale.Lang._Misc.Select}" Margin="8,0,0,0" FontWeight="Medium" VerticalAlignment="Center"/>

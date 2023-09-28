@@ -40,11 +40,11 @@ namespace CollapseLauncher
     public class RegionResourceProp : IRegionResourceCopyable<RegionResourceProp>
     {
         public RegionResourceGame data { get; set; }
-        public string imgLocalPath { get; set; } = string.Empty;
+        public string mediaLocalPath { get; set; } = string.Empty;
         public RegionResourceProp Copy() => new RegionResourceProp()
         {
             data = data?.Copy(),
-            imgLocalPath = imgLocalPath
+            mediaLocalPath = mediaLocalPath
         };
     }
 

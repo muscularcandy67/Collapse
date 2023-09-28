@@ -1,7 +1,8 @@
-﻿using CollapseLauncher.GameSettings.Genshin;
+using CollapseLauncher.GameSettings.Genshin;
 using CollapseLauncher.GameSettings.Genshin.Enums;
 using System;
 using System.Drawing;
+using static Hi3Helper.Shared.Region.LauncherConfig;
 
 namespace CollapseLauncher.Pages
 {
@@ -314,15 +315,12 @@ namespace CollapseLauncher.Pages
         #region Graphics Settings - HDR
         public bool IsHDR
         {
-            get
-            {
-                if (Settings.SettingsWindowsHDR.isHDR || Settings.SettingsGeneralData.enableHDR) return true;
-                return false;
-            }
+            get => GetAppConfigValue("ForceGIHDREnable").ToBool() || Settings.SettingsWindowsHDR.isHDR || Settings.SettingsGeneralData.enableHDR;
             set
             {
                 Settings.SettingsWindowsHDR.isHDR = value;
                 Settings.SettingsGeneralData.enableHDR = value;
+                SetAndSaveConfigValue("ForceGIHDREnable", value);
             } 
         }
 
