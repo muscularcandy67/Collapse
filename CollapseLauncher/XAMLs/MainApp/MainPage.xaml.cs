@@ -21,6 +21,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Graphics;
+using Windows.Media.Core;
+using Windows.Media.Playback;
 using static CollapseLauncher.InnerLauncherConfig;
 using static CollapseLauncher.RegionResourceListHelper;
 using static CollapseLauncher.Statics.GamePropertyVault;
@@ -268,7 +270,7 @@ namespace CollapseLauncher
 
         private async void CustomBackgroundChanger_Event(object sender, BackgroundMediaProperty e)
         {
-            string[] supportedVideoTypes = new[] { "mp4", "mpg", "m4v" };
+            string[] supportedVideoTypes = new[] { ".mp4", ".mpg", ".m4v" };
 
             e.IsMediaLoaded = false;
             regionBackgroundProp.mediaLocalPath = e.MediaPath;
@@ -282,33 +284,43 @@ namespace CollapseLauncher
                 LogWriteLine($"Custom background file {e.MediaPath} is missing!", LogType.Warning, true);
                 regionBackgroundProp.mediaLocalPath = AppDefaultBG;
             }
-
-            for (int i = 0; i < supportedVideoTypes.Length; i++)
+            
+            if (supportedVideoTypes.Contains(Path.GetExtension((regionBackgroundProp.mediaLocalPath)
+                    .TrimStart('.').ToLower())))
             {
-                if (Path.GetExtension(regionBackgroundProp.mediaLocalPath) == supportedVideoTypes[i])
-                {
-                    LogWriteLine($"[CustomBG Module] Your background is of extension " +
-                                 $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, breaking!", 
-                        LogType.Debug, false);
-                    break;
-                }
-                else
-                {
-                    try
-                    {
-                        LogWriteLine($"[CustomBG Module] Your background is of extension " +
-                                     $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, trying to " +
-                                     $"run background async task...", LogType.Debug, false);
-                        await RunApplyBackgroundTask();
-                    }
-                    catch (Exception ex)
-                    {
-                        regionBackgroundProp.mediaLocalPath = AppDefaultBG;
-                        LogWriteLine($"An error occured while loading background {e.MediaPath}\r\n{ex}", LogType.Error, true);
-                    }
-                }
-                e.IsMediaLoaded = true;
+                LogWriteLine($"[CustomBG Module - GetExtension Logic]: {Path.GetExtension((regionBackgroundProp.mediaLocalPath)
+                    .TrimStart('.').ToLower())}", LogType.Debug, false);
+                LogWriteLine($"[CustomBG Module - Contains Logic]: {supportedVideoTypes.Contains(Path.GetExtension((regionBackgroundProp.mediaLocalPath)
+                    .TrimStart('.').ToLower()))}", LogType.Debug, false);
+                LogWriteLine($"[CustomBG Module] Your background is of extension " +
+                             $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, attempting to create" +
+                             $"MediaPlayer element to load video...", 
+                    LogType.Debug, false);
+                var uri = new System.Uri(regionBackgroundProp.mediaLocalPath).AbsoluteUri;
+                MediaPlayer mediaPlayer = new MediaPlayer();
+                mediaPlayer.Source = MediaSource.CreateFromUri(new Uri(uri));
             }
+            else
+            {
+                try
+                {
+                    LogWriteLine($"[CustomBG Module - GetExtension Logic]: {Path.GetExtension((regionBackgroundProp.mediaLocalPath)
+                        .TrimStart('.').ToLower())}", LogType.Debug, false);
+                    LogWriteLine($"[CustomBG Module - Contains Logic]: {supportedVideoTypes.Contains(Path.GetExtension((regionBackgroundProp.mediaLocalPath)
+                        .TrimStart('.').ToLower()))}", LogType.Debug, false);
+                    LogWriteLine($"[CustomBG Module] Your background is of extension " +
+                                 $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, trying to " +
+                                 $"run background async task...", LogType.Debug, false);
+                    await RunApplyBackgroundTask();
+                }
+                catch (Exception ex)
+                {
+                    regionBackgroundProp.mediaLocalPath = AppDefaultBG;
+                    LogWriteLine($"An error occured while loading background {e.MediaPath}\r\n{ex}", LogType.Error, true);
+                }
+            }
+            e.IsMediaLoaded = true;
+            
 
         }
 
