@@ -289,28 +289,26 @@ namespace CollapseLauncher
                     .TrimStart('.').ToLower())))
             {
                 LogWriteLine($"[CustomBG Module - GetExtension Logic]: {Path.GetExtension((regionBackgroundProp.mediaLocalPath)
-                    .TrimStart('.').ToLower())}", LogType.Debug, false);
+                    .TrimStart('.').ToLower())}", LogType.Debug, true);
                 LogWriteLine($"[CustomBG Module - Contains Logic]: {supportedVideoTypes.Contains(Path.GetExtension((regionBackgroundProp.mediaLocalPath)
-                    .TrimStart('.').ToLower()))}", LogType.Debug, false);
+                    .TrimStart('.').ToLower()))}", LogType.Debug, true);
                 LogWriteLine($"[CustomBG Module] Your background is of extension " +
                              $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, attempting to create" +
                              $"MediaPlayer element to load video...", 
-                    LogType.Debug, false);
-                var uri = new System.Uri(regionBackgroundProp.mediaLocalPath).AbsoluteUri;
-                MediaPlayer mediaPlayer = new MediaPlayer();
-                mediaPlayer.Source = MediaSource.CreateFromUri(new Uri(uri));
+                    LogType.Debug, true);
+                await RunApplyVideoBackgroundTask();
             }
             else
             {
                 try
                 {
                     LogWriteLine($"[CustomBG Module - GetExtension Logic]: {Path.GetExtension((regionBackgroundProp.mediaLocalPath)
-                        .TrimStart('.').ToLower())}", LogType.Debug, false);
+                        .TrimStart('.').ToLower())}", LogType.Debug, true);
                     LogWriteLine($"[CustomBG Module - Contains Logic]: {supportedVideoTypes.Contains(Path.GetExtension((regionBackgroundProp.mediaLocalPath)
-                        .TrimStart('.').ToLower()))}", LogType.Debug, false);
+                        .TrimStart('.').ToLower()))}", LogType.Debug, true);
                     LogWriteLine($"[CustomBG Module] Your background is of extension " +
                                  $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, trying to " +
-                                 $"run background async task...", LogType.Debug, false);
+                                 $"run background async task...", LogType.Debug, true);
                     await RunApplyBackgroundTask();
                 }
                 catch (Exception ex)
@@ -331,6 +329,13 @@ namespace CollapseLauncher
             else
                 ApplyBackgroundAsync();
         }
+
+        private async Task RunApplyVideoBackgroundTask()
+        {
+            if(IsFirstStartup) await ApplyVideoBackground();
+            else ApplyVideoBackgroundAsync();
+        }
+
 
         private void NotificationInvoker_EventInvoker(object sender, NotificationInvokerProp e)
         {

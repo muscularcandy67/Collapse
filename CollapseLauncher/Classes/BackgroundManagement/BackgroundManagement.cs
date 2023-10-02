@@ -271,6 +271,15 @@ namespace CollapseLauncher
             return new Bitmap(image.AsStream());
         }
 
+        private async void ApplyVideoBackgruondAsync() => await ApplyVideoBackground();
+        private async Task ApplyVideoBackground()
+        {
+
+            uint Width = (uint)((double)m_actualMainFrameSize.Width * 1.5 * m_appDPIScale);
+            uint Height = (uint)((double)m_actualMainFrameSize.Height * 1.5 * m_appDPIScale);
+
+            FileStream stream = new(regionBackgroundProp.mediaLocalPath, FileMode.Open, FileAccess.Read);
+        }
         private async void ApplyBackgroundAsync() => await ApplyBackground();
 
         private async Task ApplyBackground()

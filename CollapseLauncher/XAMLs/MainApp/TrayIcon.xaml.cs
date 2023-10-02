@@ -43,7 +43,8 @@ namespace CollapseLauncher
                 ConsoleTaskbarToggle.Visibility = Visibility.Visible;
             }
         }
-
+        // 0 hidden, 5 visible
+        private int? lastConsoleStatus;
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool IsWindowVisible(IntPtr hWnd);
@@ -63,6 +64,7 @@ namespace CollapseLauncher
                 WindowExtensions.Hide(m_window);
                 MainTaskbarToggle.Text = ShowApp;
                 LogWriteLine("Main window is hidden!");
+                ToggleConsoleFromToggleWindow(true);
             }
             else
             {
@@ -70,6 +72,7 @@ namespace CollapseLauncher
                 SetForegroundWindow(mainWindowHandle);
                 MainTaskbarToggle.Text = HideApp;
                 LogWriteLine("Main window is shown!");
+                if (lastConsoleStatus == 5) ToggleConsoleFromToggleWindow(false);
             }
         }
 
