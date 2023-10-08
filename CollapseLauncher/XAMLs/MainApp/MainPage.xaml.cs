@@ -296,7 +296,6 @@ namespace CollapseLauncher
                              $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, attempting to create" +
                              $"MediaPlayer element to load video...", 
                     LogType.Debug, true);
-                await RunApplyVideoBackgroundTask();
             }
             else
             {
@@ -328,12 +327,6 @@ namespace CollapseLauncher
                 await ApplyBackground();
             else
                 ApplyBackgroundAsync();
-        }
-
-        private async Task RunApplyVideoBackgroundTask()
-        {
-            if(IsFirstStartup) await ApplyVideoBackground();
-            else ApplyVideoBackgroundAsync();
         }
 
 

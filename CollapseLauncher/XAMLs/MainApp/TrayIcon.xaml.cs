@@ -69,7 +69,6 @@ namespace CollapseLauncher
                 WindowExtensions.Hide(m_window);
                 MainTaskbarToggle.Text = _showApp;
                 LogWriteLine("Main window is hidden!");
-                ToggleConsoleFromToggleWindow(true);
             }
             else
             {
@@ -77,7 +76,6 @@ namespace CollapseLauncher
                 SetForegroundWindow(mainWindowHandle);
                 MainTaskbarToggle.Text = _hideConsole;
                 LogWriteLine("Main window is shown!");
-                if (lastConsoleStatus == 5) ToggleConsoleFromToggleWindow(false);
             }
         }
 
