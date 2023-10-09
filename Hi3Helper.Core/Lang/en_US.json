@@ -600,6 +600,8 @@
 
     "ResetKbShortcutsTitle": "Are you sure you want to reset all shortcuts?",
     "ResetKbShortcutsSubtitle": "This means every shortcut will be changed to their default key combination. \n\nDo you wish to proceed?\n\nNote: This has no impact on how Collapse operates and you can still change the combination of shortcuts by accessing the Keyboard Shortcuts menu."
+    "MeteredConnectionWarningTitle": "Metered Connection Detected!",
+    "MeteredConnectionWarningSubtitle": "Your current internet connection is stated as Metered! Continuing the action may result in additional charges. Are you sure?"
   },
 
   "_InstallMgmt": {

@@ -1,4 +1,4 @@
-﻿using CollapseLauncher.CustomControls;
+using CollapseLauncher.CustomControls;
 using Hi3Helper.Preset;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
@@ -489,6 +489,23 @@ namespace CollapseLauncher.Dialogs
                         ContentDialogButton.Primary,
                         ContentDialogTheme.Warning
             );
+        }
+
+        public static async Task<ContentDialogResult> Dialog_MeteredConnectionWarning(UIElement Content)
+        {
+            TextBlock texts = new TextBlock { TextWrapping = TextWrapping.Wrap };
+            texts.Inlines.Add(new Run { Text = Lang._Dialogs.MeteredConnectionWarningSubtitle });
+
+            return await SpawnDialog(
+                        Lang._Dialogs.MeteredConnectionWarningTitle,
+                        texts,
+                        Content,
+                        Lang._Misc.NoCancel,
+                        Lang._Misc.Yes,
+                        null,
+                        ContentDialogButton.Primary,
+                        ContentDialogTheme.Warning
+                );   
         }
 
         public static async Task<ContentDialogResult> Dialog_ResetKeyboardShortcuts(UIElement Content)
