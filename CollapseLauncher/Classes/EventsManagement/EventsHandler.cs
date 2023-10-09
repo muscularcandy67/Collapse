@@ -1,4 +1,4 @@
-﻿using Hi3Helper;
+using Hi3Helper;
 using Hi3Helper.Data;
 using Hi3Helper.Http;
 using Hi3Helper.Shared.ClassStruct;
@@ -28,13 +28,12 @@ namespace CollapseLauncher
         private static LauncherUpdateInvoker invoker = new LauncherUpdateInvoker();
         public static void GetStatus(LauncherUpdateProperty e) => invoker.GetStatus(e);
         public static bool isUpdateCooldownActive;
-        public static bool isMetered;
+        public static bool isMetered = true;
 
         public static async void StartCheckUpdate(bool forceUpdate)
         {
             NetworkCostType currentNetCostType = NetworkInformation.GetInternetConnectionProfile()?.GetConnectionCost().NetworkCostType ?? NetworkCostType.Fixed;
-            if (currentNetCostType == NetworkCostType.Unrestricted || currentNetCostType == NetworkCostType.Unknown)
-                isMetered = false;
+            isMetered = !(currentNetCostType == NetworkCostType.Unrestricted || currentNetCostType == NetworkCostType.Unknown);
 
             UpdateChannelName = IsPreview ? "preview" : "stable";
             while (true)
