@@ -607,12 +607,5 @@ namespace CollapseLauncher.Pages
             }
         }
         #endregion
-=========
-        private bool IsLowerCollapsePriorityOnGameLaunch
-        {
-            get => GetAppConfigValue("LowerCollapsePrioOnGameLaunch").ToBool();
-            set => SetAndSaveConfigValue("LowerCollapsePrioOnGameLaunch", value);
-        }
->>>>>>>>> Temporary merge branch 2
     }
 }
