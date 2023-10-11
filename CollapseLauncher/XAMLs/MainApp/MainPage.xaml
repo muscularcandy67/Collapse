@@ -16,9 +16,9 @@
     </Page.Resources>
     <Grid x:Name="MainPageGrid">
         <Grid x:Name="Background" Visibility="Collapsed">
-            <Image x:Name="BackgroundBack" Source="ms-appx:///Assets/Images/default.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0"/>
-            <MediaPlayerElement x:Name="BackgroundBackVid" Source="ms-appx:///Assets/Images/default.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0"/>
-            <Image x:Name="BackgroundBackBuffer" Source="ms-appx:///Assets/Images/default.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0"/>
+            <MediaPlayerElement x:Name="BackgroundBackVid" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0"/>
+            <Image x:Name="BackgroundBack" Source="ms-appx:///Assets/Images/default.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="100"/>
+            <Image x:Name="BackgroundBackBuffer" Source="ms-appx:///Assets/Images/default.png" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="100"/>
         </Grid>
         <Grid x:Name="BackgroundAcrylicMask" Background="{ThemeResource BackgroundImageMaskAcrylicBrush}" Visibility="Collapsed"/>
         <NavigationView x:Name="NavigationViewControl"

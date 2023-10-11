@@ -295,7 +295,15 @@ namespace CollapseLauncher
                 LogWriteLine($"[CustomBG Module] Your background is of extension " +
                              $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, attempting to create" +
                              $"MediaPlayer element to load video...", 
-                    LogType.Debug, true);
+                    LogType.Debug, false);
+                var uri = new System.Uri(regionBackgroundProp.mediaLocalPath).AbsoluteUri;
+                // MediaPlayer mediaPlayer = new MediaPlayer();
+                // mediaPlayer.Source = MediaSource.CreateFromUri(new Uri(uri));
+                // mediaPlayer.Volume = 0;
+                BackgroundBackVid.Source = MediaSource.CreateFromUri(new Uri(uri));
+                BackgroundBackVid.AutoPlay = true;
+                BackgroundBackVid.Visibility = Visibility.Visible;
+                BackgroundBackVid.IsFullWindow = true;
             }
             else
             {
