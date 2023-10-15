@@ -309,7 +309,7 @@
   "_SettingsPage": {
     "PageTitle": "앱 설정",
 
-    "Debug": "디버깅",
+    "Debug": "Additional Settings",
     "Debug_Console": "콘솔 표시",
     "Debug_IncludeGameLogs": "Save Game logs to Collapse's (might contain sensitive data)",
     "Debug_MultipleInstance": "여러 인스턴스에서 실행 허용",
@@ -372,6 +372,7 @@
     "ReportIssueBtn": "문제 보고",
     "ContributePRBtn": "기여하기",
     "ContributorListBtn": "Open Source Contributors",
+    "HelpLocalizeBtn": "Help Us Translate Collapse!",
 
     "About": "정보",
     "About_Copyright1": "© 2022-2023",
@@ -393,7 +394,8 @@
     "EnableAcrylicEffect": "Use Acrylic Blur Effect",
     "EnableDownloadChunksMerging": "Merge Downloaded Package Chunks",
 
-    "LowerCollapsePrioOnGameLaunch": "Lower Collapse process priority when a game is launched",
+    "LowerCollapsePrioOnGameLaunch": "Lower Collapse process resource usage when a game is launched",
+    "LowerCollapsePrioOnGameLaunch_Tooltip": "Disables Carousel in main page and lower Collapse's priority to Below Normal",
 
     "KbShortcuts_Title": "Keyboard Shortcuts",
     "KbShortcuts_ShowBtn": "Show Shortcuts",
@@ -931,7 +933,7 @@
     "Switch_Subtitle": "Note: The keybinds follow the selector order.",
     "Switch_SwapBtn": "Swap {0} and {1}",
     "Switch_ChangeGame": "Change game",
-    "Switch_ChangeGame_Desc": "You can use the NumPad for this shortcut too!\nE.g. {0}+1 or NumPad1 leads Honkai Impact 3rd's page (last used region).",
+    "Switch_ChangeGame_Desc": "You can use the NumPad for this shortcut too!\nE.g. {0}+1 or NumPad1 (without the {0} modifier) leads to Honkai Impact 3rd's page (last used region).",
     "Switch_ChangeRegion": "Change region",
     "Switch_ChangeRegion_Desc": "E.g. For Genshin Impact, {0}+1 leads to the Global region.",
 

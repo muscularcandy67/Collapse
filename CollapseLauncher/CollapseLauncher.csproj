@@ -11,7 +11,7 @@
 		<LangVersion>preview</LangVersion>
 		<Configurations>Debug;Debug-Trimmed;Release;Publish;Debug-Trimmed</Configurations>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-		<Version>1.73.5</Version>
+		<Version>1.72.5</Version>
 		<DebugType>portable</DebugType>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<StartupObject>CollapseLauncher.MainEntryPoint</StartupObject>
@@ -41,31 +41,11 @@
 		<DefineConstants>DISABLE_XAML_GENERATED_MAIN;ENABLEHTTPREPAIR;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION;PREVIEW</DefineConstants>
 		<Optimize>True</Optimize>
     <GitSkipCache>true</GitSkipCache>
-    <SelfContained>true</SelfContained>
-		<PublishTrimmed>true</PublishTrimmed>
-		<TrimMode>partial</TrimMode>
-    <PublishReadyToRun>true</PublishReadyToRun>
-    <AutoreleasePoolSupport>false</AutoreleasePoolSupport>
-    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
-    <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
-    <EventSourceSupport>false</EventSourceSupport>
-    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
-    <InvariantGlobalization>true</InvariantGlobalization>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Publish|x64'">
 		<DefineConstants>DISABLE_XAML_GENERATED_MAIN;ENABLEHTTPREPAIR;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION</DefineConstants>
     <Optimize>true</Optimize>
     <GitSkipCache>true</GitSkipCache>
-    <SelfContained>true</SelfContained>
-		<PublishTrimmed>true</PublishTrimmed>
-		<TrimMode>partial</TrimMode>
-		<PublishReadyToRun>true</PublishReadyToRun>
-    <AutoreleasePoolSupport>false</AutoreleasePoolSupport>
-    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
-    <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
-    <EventSourceSupport>false</EventSourceSupport>
-    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
-    <InvariantGlobalization>true</InvariantGlobalization>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Trimmed|x64'">
 	  <DefineConstants>DISABLE_XAML_GENERATED_MAIN;ENABLEHTTPREPAIR;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION;DEBUG;PREVIEW;SIMULATEAPPLYPRELOAD;DUMPGIJSON;SIMULATEGIHDR</DefineConstants>
@@ -146,13 +126,12 @@
 			<TrimmableAssembly Include="CommunityToolkit.WinUI.UI.Controls.DataGrid" />
 			<TrimmableAssembly Include="CommunityToolkit.WinUI.UI.Controls.Input" />
 			<TrimmableAssembly Include="CommunityToolkit.WinUI.UI.Controls.Layout" />
-			<TrimmableAssembly Include="CommunityToolkit.WinUI.UI.Controls.Markdown" />
 			<TrimmableAssembly Include="CommunityToolkit.WinUI.UI.Controls.Media" />
 			<TrimmableAssembly Include="CommunityToolkit.WinUI.UI.Controls.Primitives" />
 			<TrimmableAssembly Include="CommunityToolkit.WinUI.UI" />
-      		<TrimmableAssembly Include="GitInfo" />
+			<TrimmableAssembly Include="GitInfo" />
 			<TrimmableAssembly Include="Google.Protobuf" />
-      		<TrimmableAssembly Include="H.NotifyIcon.WinUI" />
+			<TrimmableAssembly Include="H.NotifyIcon.WinUI" />
 			<TrimmableAssembly Include="Microsoft.Graphics.Canvas" />
 			<TrimmableAssembly Include="Microsoft.Graphics.Canvas.Interop" />
 			<TrimmableAssembly Include="Microsoft.InteractiveExperiences.Projection" />
@@ -172,15 +151,15 @@
 			<TrimmableAssembly Include="PhotoSauce.MagicScaler" />
 			<TrimmableAssembly Include="SquirrelLib" />
 			<TrimmableAssembly Include="SharpCompress" />
-      		<TrimmableAssembly Include="System.CommandLine" />
-      		<TrimmableAssembly Include="System.CommandLine.NamingConventionBinder" />
+			<TrimmableAssembly Include="System.CommandLine" />
+			<TrimmableAssembly Include="System.CommandLine.NamingConventionBinder" />
 			<TrimmableAssembly Include="System.Drawing" />
 			<TrimmableAssembly Include="System.Drawing.Common" />
 			<TrimmableAssembly Include="System.Drawing.Primitives" />
 			<TrimmableAssembly Include="System.IO.Compression.Brotli" />
 			<TrimmableAssembly Include="System.IO.Compression" />
-      		<TrimmableAssembly Include="System.Net.HTTP" />
-      		<TrimmableAssembly Include="System.Text.RegularExpression" />
+			<TrimmableAssembly Include="System.Net.HTTP" />
+			<TrimmableAssembly Include="System.Text.RegularExpression" />
 			<TrimmableAssembly Include="WinRT.Runtime" />
       <TrimmableAssembly Include="GitInfo" />
 		</ItemGroup>

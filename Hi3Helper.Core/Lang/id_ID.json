@@ -309,7 +309,7 @@
   "_SettingsPage": {
     "PageTitle": "Pengaturan Aplikasi",
 
-    "Debug": "Debugging",
+    "Debug": "Pengaturan Tambahan",
     "Debug_Console": "Perlihatkan Konsol",
     "Debug_IncludeGameLogs": "Simpan catatan game ke Collapse (kemungkinan berisi data sensitif)",
     "Debug_MultipleInstance": "Perbolehkan Multiple Instance",
@@ -372,10 +372,11 @@
     "ReportIssueBtn": "Laporkan Isu",
     "ContributePRBtn": "Kontribusi ke Pull Request",
     "ContributorListBtn": "Kontributor Open Source",
+    "HelpLocalizeBtn": "Bantu Kami Menerjemahkan Collapse!",
 
     "About": "Tentang",
-    "About_Copyright1": "",
-    "About_Copyright2": "",
+    "About_Copyright1": "© 2022-2023",
+    "About_Copyright2": " neon-nyan, Cry0, bagusnl & Kuro",
     "About_Copyright3": "Di bawah lisensi",
     "About_Copyright4": ". Hak cipta dilindungi.",
 
@@ -393,7 +394,8 @@
     "EnableAcrylicEffect": "Gunakan Efek Blur Akrilik",
     "EnableDownloadChunksMerging": "Gabung Potongan Unduhan Package",
 
-    "LowerCollapsePrioOnGameLaunch": "Lower Collapse process priority when a game is launched",
+    "LowerCollapsePrioOnGameLaunch": "Turunkan Prioritas Collapse saat Game Berjalan",
+    "LowerCollapsePrioOnGameLaunch_Tooltip": "Hentikan tayangan slide gambar di halaman utama dan menurunkan prioritas Collapse ke Dibawah Normal ",
 
     "KbShortcuts_Title": "Pintasan Keyboard",
     "KbShortcuts_ShowBtn": "Tunjukkan Pintasan",
@@ -931,7 +933,7 @@
     "Switch_Subtitle": "Catatan: Kombinasi mengikuti urutan pilihan.",
     "Switch_SwapBtn": "Tukar {0} dengan {1}",
     "Switch_ChangeGame": "Ubah game",
-    "Switch_ChangeGame_Desc": "Kamu juga dapat menggunakan NumPad untuk pintasan ini!\nContoh. {0}+1 atau NumPad1 membukan halaman terakhir Honkai Impact 3rd.",
+    "Switch_ChangeGame_Desc": "Kamu juga dapat menggunakan NumPad untuk pintasan ini!\nContoh: {0}+1 atau NumPad1 (tanpa modifier {0}) membuka halaman terakhir Honkai Impact 3rd.",
     "Switch_ChangeRegion": "Ubah region",
     "Switch_ChangeRegion_Desc": "Contoh. Untuk Genshin Impact, {0}+1 membuka region Global.",
 
