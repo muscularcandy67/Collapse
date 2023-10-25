@@ -181,7 +181,8 @@ namespace Hi3Helper.Shared.Region
             { "UseDownloadChunksMerging", false },
             { "LowerCollapsePrioOnGameLaunch", false },
             { "EnableHTTPRepairOverride", false },
-            { "ForceGIHDREnable", false }
+            { "ForceGIHDREnable", false },
+            { "HI3IgnoreMediaPack", false }
         };
 
         public static void LoadGamePreset()
