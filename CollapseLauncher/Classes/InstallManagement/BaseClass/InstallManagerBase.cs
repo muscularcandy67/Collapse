@@ -1,11 +1,12 @@
+using CollapseLauncher.FileDialogCOM;
 using CollapseLauncher.Interfaces;
 using Hi3Helper;
 using Hi3Helper.Data;
-using Hi3Helper.EncTool;
 using Hi3Helper.Http;
 using Hi3Helper.Preset;
 using Hi3Helper.Shared.ClassStruct;
 using Hi3Helper.Shared.Region;
+using Hi3Helper.SharpHDiffPatch;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Win32;
@@ -16,14 +17,13 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using static CollapseLauncher.Dialogs.SimpleDialogs;
 using static Hi3Helper.Locale;
 using static Hi3Helper.Logger;
-using PatcherHDiff = Hi3Helper.SharpHDiffPatch;
+using CoreCombinedStream = Hi3Helper.EncTool.CombinedStream;
 
 namespace CollapseLauncher.InstallManager.Base
 {
@@ -309,7 +309,7 @@ namespace CollapseLauncher.InstallManager.Base
         private Stream GetSingleOrSegmentedDownloadStream(GameInstallPackage asset)
         {
             return asset.Segments != null && asset.Segments.Count != 0 ?
-                new CombinedStream(asset.Segments.Select(x => x.GetReadStream(_downloadThreadCount)).ToArray()) :
+                new CoreCombinedStream(asset.Segments.Select(x => x.GetReadStream(_downloadThreadCount)).ToArray()) :
                 asset.GetReadStream(_downloadThreadCount);
         }
 
@@ -522,6 +522,7 @@ namespace CollapseLauncher.InstallManager.Base
                 }
                 else foldersToKeepInDataFullPath = Array.Empty<string>();
 
+#pragma warning disable CS8604 // Possible null reference argument.
                 LogWriteLine($"Uninstalling game: {_gameVersionManager.GameType} - region: {_gameVersionManager.GamePreset.ZoneName}\r\n" +
                     $"  GameFolder          : {GameFolder}\r\n" +
                     $"  gameDataFolderName  : {UninstallProperty.gameDataFolderName}\r\n" +
@@ -530,6 +531,7 @@ namespace CollapseLauncher.InstallManager.Base
                     $"  foldersToKeepInData : {string.Join(", ", UninstallProperty.foldersToKeepInData)}\r\n" +
                     $"  _Data folder path   : {_DataFolderFullPath}\r\n" +
                     $"  Excluded full paths : {string.Join(", ", foldersToKeepInDataFullPath)}", LogType.Warning, true);
+#pragma warning restore CS8604 // Possible null reference argument.
 
                 // Cleanup Game_Data folder while keeping whatever specified in foldersToKeepInData
                 foreach (string folderGameData in Directory.EnumerateFileSystemEntries(_DataFolderFullPath))
@@ -715,7 +717,7 @@ namespace CollapseLauncher.InstallManager.Base
             _progressTotalCount = 1;
             _progressTotalCountFound = hdiffEntry.Count;
 
-            PatcherHDiff.HDiffPatch patcher = new PatcherHDiff.HDiffPatch();
+            HDiffPatch patcher = new HDiffPatch();
             foreach (PkgVersionProperties entry in hdiffEntry)
             {
                 _status.ActivityStatus = string.Format("{0}: {1}", Lang._Misc.Patching, string.Format(Lang._Misc.PerFromTo, _progressTotalCount, _progressTotalCountFound));
@@ -728,7 +730,9 @@ namespace CollapseLauncher.InstallManager.Base
                 try
                 {
                     _token.Token.ThrowIfCancellationRequested();
-                    PatcherHDiff.EventListener.PatchEvent += EventListener_PatchEvent;
+                    HDiffPatch.LogVerbosity = Verbosity.Verbose;
+                    EventListener.LoggerEvent += EventListener_PatchLogEvent;
+                    EventListener.PatchEvent += EventListener_PatchEvent;
                     if (File.Exists(sourceBasePath) && File.Exists(patchPath))
                     {
                         LogWriteLine($"Patching file {entry.remoteName}...", LogType.Default, true);
@@ -738,7 +742,7 @@ namespace CollapseLauncher.InstallManager.Base
                         await Task.Run(() =>
                         {
                             patcher.Initialize(patchPath);
-                            patcher.Patch(sourceBasePath, destPath, true, _token.Token);
+                            patcher.Patch(sourceBasePath, destPath, true, _token.Token, false, true);
                         }, _token.Token);
 
                         File.Move(destPath, sourceBasePath, true);
@@ -763,7 +767,8 @@ namespace CollapseLauncher.InstallManager.Base
                 }
                 finally
                 {
-                    PatcherHDiff.EventListener.PatchEvent -= EventListener_PatchEvent;
+                    EventListener.PatchEvent -= EventListener_PatchEvent;
+                    EventListener.LoggerEvent -= EventListener_PatchLogEvent;
                     try
                     {
                         if (File.Exists(destPath)) File.Delete(destPath);
@@ -782,7 +787,7 @@ namespace CollapseLauncher.InstallManager.Base
             }
         }
 
-        private async void EventListener_PatchEvent(object sender, PatcherHDiff.PatchEvent e)
+        private async void EventListener_PatchEvent(object sender, PatchEvent e)
         {
             _progress.ProgressTotalDownload += e.Read;
             if (await base.CheckIfNeedRefreshStopwatch())
@@ -793,6 +798,29 @@ namespace CollapseLauncher.InstallManager.Base
                 _progress.ProgressTotalTimeLeft = TimeSpan.FromSeconds((_progress.ProgressTotalSizeToDownload - _progress.ProgressTotalDownload) / ConverterTool.Unzeroed(_progress.ProgressTotalSpeed));
                 UpdateProgress();
             }
+        }
+
+        private void EventListener_PatchLogEvent(object sender, LoggerEvent e)
+        {
+            if (HDiffPatch.LogVerbosity == Verbosity.Quiet
+            || (HDiffPatch.LogVerbosity == Verbosity.Debug
+            && !(e.LogLevel == Verbosity.Debug ||
+                 e.LogLevel == Verbosity.Verbose ||
+                 e.LogLevel == Verbosity.Info))
+            || (HDiffPatch.LogVerbosity == Verbosity.Verbose
+            && !(e.LogLevel == Verbosity.Verbose ||
+                 e.LogLevel == Verbosity.Info))
+            || (HDiffPatch.LogVerbosity == Verbosity.Info
+            && !(e.LogLevel == Verbosity.Info))) return;
+
+            LogType type = e.LogLevel switch
+            {
+                Verbosity.Verbose => LogType.Debug,
+                Verbosity.Debug => LogType.Debug,
+                _ => LogType.Default
+            };
+
+            LogWriteLine(e.Message, type, true);
         }
 
         public virtual List<PkgVersionProperties> TryGetHDiffList()
@@ -810,18 +838,14 @@ namespace CollapseLauncher.InstallManager.Base
                     {
                         while (!listReader.EndOfStream)
                         {
-                            prop = (PkgVersionProperties)JsonSerializer
-                                .Deserialize(
-                                    listReader.ReadLine(),
-                                    typeof(PkgVersionProperties),
-                                    CoreLibraryJSONContext.Default);
+                            prop = listReader.ReadLine().Deserialize<PkgVersionProperties>(CoreLibraryJSONContext.Default);
 
                             string filePath = Path.Combine(_gamePath, prop.remoteName + ".hdiff");
                             if (File.Exists(filePath))
                             {
                                 try
                                 {
-                                    prop.fileSize = PatcherHDiff.HDiffPatch.GetHDiffNewSize(filePath);
+                                    prop.fileSize = HDiffPatch.GetHDiffNewSize(filePath);
                                     LogWriteLine($"hdiff entry: {prop.remoteName}", LogType.Default, true);
 
                                     _out.Add(prop);
@@ -842,7 +866,7 @@ namespace CollapseLauncher.InstallManager.Base
 
             return _out;
         }
-#endregion
+        #endregion
 
         #region Private Methods - GetInstallationPath
         private async ValueTask<int> CheckExistingSteamInstallation()
