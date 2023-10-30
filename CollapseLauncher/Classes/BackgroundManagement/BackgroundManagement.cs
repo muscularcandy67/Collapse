@@ -14,6 +14,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Media.Core;
 using Windows.Storage.Streams;
 using static CollapseLauncher.InnerLauncherConfig;
 using static CollapseLauncher.RegionResourceListHelper;
@@ -279,11 +280,40 @@ namespace CollapseLauncher
             uint Height = (uint)((double)m_actualMainFrameSize.Height * 1.5 * m_appDPIScale);
 
             FileStream stream = new(regionBackgroundProp.mediaLocalPath, FileMode.Open, FileAccess.Read);
+            var uri = new System.Uri(regionBackgroundProp.mediaLocalPath).AbsoluteUri;
+            BackgroundBackVid.Source = MediaSource.CreateFromUri(new Uri(uri));
+
+            //BackgroundBackVid.MediaPlayer.AudioBalance = 0;
+            //BackgroundBackVid.Visibility = Visibility.Visible;
+            EnableBackgroundVid();
+        }
+
+        private void EnableBackgroundVid()
+        {
+            BackgroundBackVid.Visibility = Visibility.Visible;
+            BackgroundBackVid.IsEnabled = true;
+            BackgroundBackVid.MediaPlayer.Play();
+        }
+
+        private void DisableBackgroundVid()
+        {
+            BackgroundBackVid.Visibility = Visibility.Collapsed;
+            BackgroundBackVid.IsEnabled = false;
+            BackgroundBackVid.MediaPlayer.Pause();
+
         }
         private async void ApplyBackgroundAsync() => await ApplyBackground();
 
         private async Task ApplyBackground()
         {
+            try
+            {
+                DisableBackgroundVid();
+            }
+            catch (Exception ex)
+            {
+                LogWriteLine(ex.Message, LogType.Error, true);
+            } 
             BackgroundBackBuffer.Source = BackgroundBitmap;
 
             uint Width = (uint)((double)m_actualMainFrameSize.Width * 1.5 * m_appDPIScale);

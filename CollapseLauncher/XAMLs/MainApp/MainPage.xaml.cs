@@ -285,7 +285,7 @@ namespace CollapseLauncher
                 LogWriteLine($"Custom background file {e.MediaPath} is missing!", LogType.Warning, true);
                 regionBackgroundProp.mediaLocalPath = AppDefaultBG;
             }
-            
+
             if (supportedVideoTypes.Contains(Path.GetExtension((regionBackgroundProp.mediaLocalPath)
                     .TrimStart('.').ToLower())))
             {
@@ -294,17 +294,11 @@ namespace CollapseLauncher
                 LogWriteLine($"[CustomBG Module - Contains Logic]: {supportedVideoTypes.Contains(Path.GetExtension((regionBackgroundProp.mediaLocalPath)
                     .TrimStart('.').ToLower()))}", LogType.Debug, true);
                 LogWriteLine($"[CustomBG Module] Your background is of extension " +
-                             $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, attempting to create" +
-                             $"MediaPlayer element to load video...", 
+                             $"{Path.GetExtension(regionBackgroundProp.mediaLocalPath)}, attempting to create " +
+                             $"MediaPlayer element to load video...",
                     LogType.Debug, false);
-                var uri = new System.Uri(regionBackgroundProp.mediaLocalPath).AbsoluteUri;
-                // MediaPlayer mediaPlayer = new MediaPlayer();
-                // mediaPlayer.Source = MediaSource.CreateFromUri(new Uri(uri));
-                // mediaPlayer.Volume = 0;
-                BackgroundBackVid.Source = MediaSource.CreateFromUri(new Uri(uri));
-                BackgroundBackVid.AutoPlay = true;
-                BackgroundBackVid.Visibility = Visibility.Visible;
-                BackgroundBackVid.IsFullWindow = true;
+
+                ApplyVideoBackgruondAsync();
             }
             else
             {

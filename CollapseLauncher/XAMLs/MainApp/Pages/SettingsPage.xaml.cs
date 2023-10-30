@@ -309,62 +309,62 @@ namespace CollapseLauncher.Pages
         {
             get
             {
-                bool IsEnabled = GetAppConfigValue("UseCustomBG").ToBool();
-                string BGPath = GetAppConfigValue("CustomBGPath").ToString();
-                if (!string.IsNullOrEmpty(BGPath))
-                    BGPathDisplay.Text = BGPath;
-                else
-                    BGPathDisplay.Text = Lang._Misc.NotSelected;
-
-                if (IsEnabled)
-                {
-                    AppBGCustomizer.Visibility = Visibility.Visible;
-                    AppBGCustomizerNote.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    AppBGCustomizer.Visibility = Visibility.Collapsed;
-                    AppBGCustomizerNote.Visibility = Visibility.Collapsed;
-                }
-
-                BGSelector.IsEnabled = IsEnabled;
-                return IsEnabled;
-            }
-            set
-            {
-                SetAndSaveConfigValue("UseCustomBG", new IniValue(value));
-                if (!value)
-                {
-                    BGPathDisplay.Text = Lang._Misc.NotSelected;
-                    regionBackgroundProp.mediaLocalPath = GetAppConfigValue("CurrentBackground").ToString();
-                    m_mainPage?.ChangeBackgroundImageAsRegionAsync();
-                    AppBGCustomizer.Visibility = Visibility.Collapsed;
-                    AppBGCustomizerNote.Visibility = Visibility.Collapsed;
-                }
-                else
-                {
+                    bool IsEnabled = GetAppConfigValue("UseCustomBG").ToBool();
                     string BGPath = GetAppConfigValue("CustomBGPath").ToString();
-                    if (string.IsNullOrEmpty(BGPath))
+                    if (!string.IsNullOrEmpty(BGPath))
+                        BGPathDisplay.Text = BGPath;
+                    else
+                        BGPathDisplay.Text = Lang._Misc.NotSelected;
+
+                    if (IsEnabled)
                     {
-                        regionBackgroundProp.mediaLocalPath = AppDefaultBG;
+                        AppBGCustomizer.Visibility = Visibility.Visible;
+                        AppBGCustomizerNote.Visibility = Visibility.Visible;
                     }
                     else
                     {
-                        if (!File.Exists(BGPath))
+                        AppBGCustomizer.Visibility = Visibility.Collapsed;
+                        AppBGCustomizerNote.Visibility = Visibility.Collapsed;
+                    }
+
+                    BGSelector.IsEnabled = IsEnabled;
+                    return IsEnabled;
+            }
+            set
+            {
+                    SetAndSaveConfigValue("UseCustomBG", new IniValue(value));
+                    if (!value)
+                    {
+                        BGPathDisplay.Text = Lang._Misc.NotSelected;
+                        regionBackgroundProp.mediaLocalPath = GetAppConfigValue("CurrentBackground").ToString();
+                        m_mainPage?.ChangeBackgroundImageAsRegionAsync();
+                        AppBGCustomizer.Visibility = Visibility.Collapsed;
+                        AppBGCustomizerNote.Visibility = Visibility.Collapsed;
+                    }
+                    else
+                    {
+                        string BGPath = GetAppConfigValue("CustomBGPath").ToString();
+                        if (string.IsNullOrEmpty(BGPath))
                         {
                             regionBackgroundProp.mediaLocalPath = AppDefaultBG;
                         }
                         else
                         {
-                            regionBackgroundProp.mediaLocalPath = BGPath;
+                            if (!File.Exists(BGPath))
+                            {
+                                regionBackgroundProp.mediaLocalPath = AppDefaultBG;
+                            }
+                            else
+                            {
+                                regionBackgroundProp.mediaLocalPath = BGPath;
+                            }
                         }
+                        BGPathDisplay.Text = regionBackgroundProp.mediaLocalPath;
+                        BackgroundMediaChanger.ChangeBackground(regionBackgroundProp.mediaLocalPath);
+                        AppBGCustomizer.Visibility = Visibility.Visible;
+                        AppBGCustomizerNote.Visibility = Visibility.Visible;
                     }
-                    BGPathDisplay.Text = regionBackgroundProp.mediaLocalPath;
-                    BackgroundMediaChanger.ChangeBackground(regionBackgroundProp.mediaLocalPath);
-                    AppBGCustomizer.Visibility = Visibility.Visible;
-                    AppBGCustomizerNote.Visibility = Visibility.Visible;
-                }
-                BGSelector.IsEnabled = value;
+                    BGSelector.IsEnabled = value;
             }
         }
 

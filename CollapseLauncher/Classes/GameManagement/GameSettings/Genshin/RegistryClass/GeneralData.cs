@@ -346,9 +346,14 @@ namespace CollapseLauncher.GameSettings.Genshin
                 LogWriteLine($"Loaded Genshin Settings", LogType.Default, true);
 #endif
                 GeneralData data = byteStr.Deserialize<GeneralData>(GenshinSettingsJSONContext.Default) ?? new GeneralData();
+#if DUMPGIJSON
+                LogWriteLine($"graphicsData dump:\r\n\t{data._graphicsData}");
+                LogWriteLine($"globalPerfData dump:\r\n\t{data._globalPerfData}");
+#endif
                 data.graphicsData = GraphicsData.Load(data._graphicsData);
                 data.globalPerfData = GlobalPerfData.Load(data._globalPerfData, data.graphicsData);
                 return data;
+
             }
             catch (Exception ex)
             {
