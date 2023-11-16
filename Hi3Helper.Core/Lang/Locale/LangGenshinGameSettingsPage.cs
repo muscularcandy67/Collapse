@@ -1,5 +1,5 @@
 namespace Hi3Helper
-{ 
+{
     public sealed partial class Locale
     {
         #region GenshinGameSettingsPage

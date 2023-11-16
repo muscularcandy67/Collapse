@@ -1,15 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+		<TargetFrameworks>net8.0</TargetFrameworks>
 		<Platforms>x64</Platforms>
 		<Configurations>Debug;Release;Publish;Debug-Trimmed</Configurations>
 		<WarningLevel>6</WarningLevel>
 		<LangVersion>preview</LangVersion>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DebugType>portable</DebugType>
-		<DefineConstants>HDIFFEXPERIMENTAL</DefineConstants>
 		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+		<TieredCompilation>true</TieredCompilation>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

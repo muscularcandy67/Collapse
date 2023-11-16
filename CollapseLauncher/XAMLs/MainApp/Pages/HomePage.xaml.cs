@@ -2,7 +2,6 @@ using CollapseLauncher.Dialogs;
 using CollapseLauncher.Interfaces;
 using CollapseLauncher.Statics;
 using CollapseLauncher.FileDialogCOM;
-using CommunityToolkit.WinUI.UI.Controls;
 using Hi3Helper;
 using Hi3Helper.Preset;
 using Hi3Helper.Screen;
@@ -51,7 +50,7 @@ namespace CollapseLauncher.Pages
         #region Properties
         private GamePresetProperty CurrentGameProperty { get; set; }
         private HomeMenuPanel MenuPanels { get => regionNewsProp; }
-        private CancellationTokenSource PageToken { get; init; }
+        private CancellationTokenSource PageToken { get; set; }
         private CancellationTokenSource CarouselToken { get; set; }
         private CancellationTokenSource PlaytimeToken { get; set; }
         #endregion
@@ -59,13 +58,13 @@ namespace CollapseLauncher.Pages
         #region PageMethod
         public HomePage()
         {
-            CurrentGameProperty = GamePropertyVault.GetCurrentGameProperty();
-            PageToken = new CancellationTokenSource();
-            CarouselToken = new CancellationTokenSource();
-            PlaytimeToken = new CancellationTokenSource();
-            this.InitializeComponent();
-            CheckIfRightSideProgress();
             this.Loaded += StartLoadedRoutine;
+        }
+
+        ~HomePage()
+        {
+            // HACK: Fix random crash by always unsubscribing the StartLoadedRoutine if the GC is calling the deconstructor.
+            this.Loaded -= StartLoadedRoutine;
         }
 
         private bool IsPageUnload { get; set; }
@@ -85,7 +84,20 @@ namespace CollapseLauncher.Pages
         {
             try
             {
-                BackgroundMediaChanger.ToggleBackground(false);
+                // HACK: Fix random crash by manually load the XAML part
+                //       But first, let it initialize its properties.
+                CurrentGameProperty = GamePropertyVault.GetCurrentGameProperty();
+                PageToken = new CancellationTokenSource();
+                CarouselToken = new CancellationTokenSource();
+                PlaytimeToken = new CancellationTokenSource();
+
+                // Always set the _contentLoaded as true and load the XAML
+                _contentLoaded = true;
+                Uri resourceLocator = new Uri("ms-appx:///XAMLs/MainApp/Pages/HomePage.xaml");
+                Application.LoadComponent(this, resourceLocator, ComponentResourceLocation.Application);
+
+                BackgroundImgChanger.ToggleBackground(false);
+                CheckIfRightSideProgress();
                 GetCurrentGameState();
 
                 if (!GetAppConfigValue("ShowEventsPanel").ToBool())
@@ -245,8 +257,12 @@ namespace CollapseLauncher.Pages
 
         private void CarouselRestartScroll(object sender, PointerRoutedEventArgs e)
         {
-            CarouselToken = new CancellationTokenSource();
-            StartCarouselAutoScroll(CarouselToken.Token);
+            // Don't restart carousel if game is running and LoPrio is on
+            if (!CurrentGameProperty.IsGameRunning || !GetAppConfigValue("LowerCollapsePrioOnGameLaunch").ToBool())
+            {
+                CarouselToken = new CancellationTokenSource();
+                StartCarouselAutoScroll(CarouselToken.Token);
+            }
         }
 
         private async void HideImageCarousel(bool hide)
@@ -395,7 +411,7 @@ namespace CollapseLauncher.Pages
         #region Open Link from Tag
         private void OpenImageLinkFromTag(object sender, PointerRoutedEventArgs e)
         {
-            SpawnWebView2.SpawnWebView2Window(((ImageEx)sender).Tag.ToString());
+            SpawnWebView2.SpawnWebView2Window(((ImageEx.ImageEx)sender).Tag.ToString());
         }
 
         private async void OpenButtonLinkFromTag(object sender, RoutedEventArgs e)

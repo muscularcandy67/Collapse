@@ -3,21 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace CollapseLauncher.FileDialogCOM
 {
-    [ComImport]
-    [ClassInterface(ClassInterfaceType.None)]
-    [TypeLibType(TypeLibTypeFlags.FCanCreate)]
-    [Guid(CLSIDGuid.FileOpenDialog)]
-    public partial class FileOpenDialogRCW
-    { }
-
-    [ComImport]
-    [ClassInterface(ClassInterfaceType.None)]
-    [TypeLibType(TypeLibTypeFlags.FCanCreate)]
-    [Guid(CLSIDGuid.FileSaveDialog)]
-    public partial class FileSaveDialogRCW
-    { }
-
-    public class IIDGuid
+    /*public class IIDGuid
     {
         private IIDGuid() { } // Avoid FxCop violation AvoidUninstantiatedInternalClasses
                               // IID GUID strings for relevant COM interfaces 
@@ -38,5 +24,5 @@ namespace CollapseLauncher.FileDialogCOM
     }
 
     // HACK: Since the class is only available for Windows.Forms and we are avoiding to use that, then use this dummy one instead.
-    public partial class FileDialogCustomPlace { }
+    public partial class FileDialogCustomPlace { }*/
 }
