@@ -177,12 +177,17 @@ namespace CollapseLauncher
                 return false;
             }
 
+#if DEBUG
+            LogWriteLine("Skipping metadata check", LogType.Warning, true);
+            return false;
+#else
             bool isMetadataOutdated = ConfigV2LastUpdate < ConfigStamp?.LastUpdated;
             LogWriteLine($"Checking for metadata update...\r\n" +
                          $"  LocalStamp  : {ConfigV2LastUpdate}\r\n" +
                          $"  RemoteStamp : {ConfigStamp?.LastUpdated}\r\n" +
                          $"  Out of date?: {isMetadataOutdated}", LogType.Warning, true);
             return isMetadataOutdated;
+#endif
         }
 
         public static async Task DownloadConfigV2Files(bool Stamp, bool Content)
@@ -204,6 +209,19 @@ namespace CollapseLauncher
             using (FileStream fs = new FileStream(output, FileMode.Create, FileAccess.Write))
             {
                 await FallbackCDNUtil.DownloadCDNFallbackContent(_httpClient, fs, URL, default).ConfigureAwait(false);
+            }
+        }
+
+        private static async Task GetConfigV2Content(Http _httpClient, string prefix, string[] output)
+        {
+
+            string URL = string.Format(AppGameConfigV2URLPrefix, (IsPreview ? "preview" : "stable") + prefix);
+            foreach (string s in output)
+            {
+                using (FileStream fs = new FileStream(s, FileMode.Create, FileAccess.Write))
+                {
+                    await FallbackCDNUtil.DownloadCDNFallbackContent(_httpClient, fs, URL, default).ConfigureAwait(false);
+                }
             }
         }
     }

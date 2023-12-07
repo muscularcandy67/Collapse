@@ -89,7 +89,19 @@ namespace Hi3Helper.DiscordPresence
                     {
                         // Initialize Discord Presence client and Activity property
                         _client = new Discord.Discord(applicationId, (ulong)CreateFlags.NoRequireDiscord);
-                        if (isInitialStart) _activity = new Activity();
+                        if (isInitialStart) _activity = new Activity
+                        {
+                            Details = StrToByteUtf8($"{Lang._Misc.DiscordRP_Default}"),
+                            Assets = new ActivityAssets
+                            {
+                                LargeImage = StrToByteUtf8($"launcher-logo"),
+#if DEBUG
+                                LargeText = StrToByteUtf8($"Collapse Launcher v{AppCurrentVersionString}d {(IsPreview ? " -PRE" : string.Empty)}")
+#else
+                                LargeText = StrToByteUtf8($"Collapse Launcher v{AppCurrentVersionString} {(IsPreview ? " -PRE" : string.Empty)}");
+#endif
+                            }
+                        };
                         else SetActivity(_activityType);
 
                         // Initialize the Activity Manager instance
@@ -146,6 +158,9 @@ namespace Hi3Helper.DiscordPresence
                         case "Genshin Impact":
                             EnablePresence(isInitialStart, AppDiscordApplicationID_GI);
                             break;
+                        case "Zenless Zone Zero":
+                            EnablePresence(isInitialStart, AppDiscordApplicationID_ZZZ);
+                            break;
                         default:
                             Logger.LogWriteLine($"Discord Presence (Unknown Game)");
                             break;
@@ -191,7 +206,7 @@ namespace Hi3Helper.DiscordPresence
                             BuildActivityAppStatus(Lang._Misc.DiscordRP_GameSettings, IsGameStatusEnabled);
                             break;
                         case ActivityType.AppSettings:
-                            BuildActivityAppStatus(Lang._Misc.DiscordRP_AppSettings, IsGameStatusEnabled);
+                            BuildActivityAppStatus(Lang._Misc.DiscordRP_AppSettings, IsGameStatusEnabled, true);
                             break;
                         case ActivityType.Idle:
                             _lastUnixTimestamp = null;
@@ -248,18 +263,18 @@ namespace Hi3Helper.DiscordPresence
             return _lastUnixTimestamp ?? 0;
         }
 
-        private void BuildActivityAppStatus(string activityName, bool isGameStatusEnabled)
+        private void BuildActivityAppStatus(string activityName, bool isGameStatusEnabled, bool appSettings = false)
         {
             _activity = new Activity
             {
-                Details = StrToByteUtf8($"{activityName} {(!isGameStatusEnabled ? string.Empty : Lang._Misc.DiscordRP_Ad)}"),
-                State = StrToByteUtf8($"{Lang._Misc.DiscordRP_Region} {ConfigV2Store.CurrentConfigV2GameRegion}"),
+                Details = StrToByteUtf8($"{(!appSettings ? ConfigV2Store.CurrentConfigV2GameCategory + " - " : string.Empty)} {activityName} {(isGameStatusEnabled ? Lang._Misc.DiscordRP_Ad : string.Empty)}"),
+                State = appSettings ? null : StrToByteUtf8($"{Lang._Misc.DiscordRP_Region} {ConfigV2Store.CurrentConfigV2GameRegion}"),
                 Assets = new ActivityAssets
                 {
-                    LargeImage = StrToByteUtf8($"game-{ConfigV2Store.CurrentConfigV2.GameType.ToString().ToLower()}-logo"),
+                    LargeImage = StrToByteUtf8(appSettings ? $"launcher-logo" : $"game-{ConfigV2Store.CurrentConfigV2.GameType.ToString().ToLower()}-logo"),
                     LargeText = StrToByteUtf8($"{ConfigV2Store.CurrentConfigV2GameCategory}"),
-                    SmallImage = StrToByteUtf8($"launcher-logo"),
-                    SmallText = StrToByteUtf8($"Collapse Launcher v{AppCurrentVersionString} {(IsPreview ? "Preview" : "Stable")}")
+                    SmallImage = appSettings ? null : StrToByteUtf8($"launcher-logo"),
+                    SmallText = appSettings ? null : StrToByteUtf8($"Collapse Launcher v{AppCurrentVersionString} {(IsPreview ? "Preview" : "Stable")}")
                 },
             };
         }

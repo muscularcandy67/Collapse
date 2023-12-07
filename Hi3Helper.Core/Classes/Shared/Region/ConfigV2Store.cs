@@ -53,21 +53,25 @@ namespace Hi3Helper.Preset
         public static void LoadConfigV2()
         {
             string stamp = File.ReadAllText(AppGameConfigV2StampPath);
-            string content = File.ReadAllText(AppGameConfigV2MetadataPath);
+            ConfigV2GameCategory = new();
+            foreach (string s in AppGameConfigV2MetadataPath)
+            {
+                string content = File.ReadAllText(s);
+                if (string.IsNullOrEmpty(content))
+                    throw new NullReferenceException($"{AppGameConfigV2MetadataPath} file seems to be empty. Please remove it and restart the launcher!");
+                Metadata tempConfig = (Metadata)JsonSerializer
+                    .Deserialize(content, typeof(Metadata), CoreLibraryJSONContext.Default);
+                if (tempConfig is null) throw new NullReferenceException("Metadata config is broken");
+                ConfigV2GameCategory.AddRange(tempConfig.MetadataV2.Keys.ToList());
+                ConfigV2.AddStrings(tempConfig);
+            }
             if (string.IsNullOrEmpty(stamp)) throw new NullReferenceException($"{AppGameConfigV2StampPath} file seems to be empty. Please remove it and restart the launcher!");
-            if (string.IsNullOrEmpty(content)) throw new NullReferenceException($"{AppGameConfigV2MetadataPath} file seems to be empty. Please remove it and restart the launcher!");
-
-            ConfigV2 = (Metadata)JsonSerializer
-                .Deserialize(content, typeof(Metadata), CoreLibraryJSONContext.Default);
-
-            if (ConfigV2 is null) throw new NullReferenceException("Metadata config is broken");
-
-            ConfigV2GameCategory = ConfigV2.MetadataV2.Keys.ToList();
 
             ConfigV2LastUpdate = ((Stamp)JsonSerializer
                 .Deserialize(stamp, typeof(Stamp), CoreLibraryJSONContext.Default)).LastUpdated;
 
-            ConfigV2.DecryptStrings();
+            //ConfigV2.DecryptStrings();//
+            //ConfigV2.GenerateHashID();
             ConfigV2.GenerateHashID();
         }
 
@@ -128,6 +132,17 @@ namespace Hi3Helper.Preset
             FileInfo file = new FileInfo(name);
             if (!file.Exists) return false;
             if (file.Length < 2) return false;
+            return true;
+        }
+
+        private static bool CheckConfigV2StampContent(string[] name)
+        {
+            foreach (string s in name)
+            {
+                FileInfo file = new(s);
+                if (!file.Exists) return false;
+                if (file.Length < 2) return false;
+            }
             return true;
         }
     }

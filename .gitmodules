@@ -1,15 +1,15 @@
 [submodule "Hi3Helper.Core/Classes/Data/Tools/SevenZipTool/SevenZipExtractor"]
 	path = Hi3Helper.Core/Classes/Data/Tools/SevenZipTool/SevenZipExtractor
-	url = https://github.com/neon-nyan/SevenZipExtractor
+	url = https://github.com/CollapseLauncher/SevenZipExtractor.git
 [submodule "Hi3Helper.Http"]
 	path = Hi3Helper.Http
-	url = https://github.com/neon-nyan/Hi3Helper.Http
+	url = https://github.com/CollapseLauncher/Hi3Helper.Http.git
 [submodule "ColorThief"]
 	path = ColorThief
 	url = https://github.com/neon-nyan/ColorThief
 [submodule "Hi3Helper.EncTool"]
 	path = Hi3Helper.EncTool
-	url = https://github.com/neon-nyan/Hi3Helper.EncTool
+	url = https://github.com/CollapseLauncher/Hi3Helper.EncTool.git
 [submodule "Hi3Helper.SharpHDiffPatch"]
 	path = Hi3Helper.SharpHDiffPatch
-	url = https://github.com/neon-nyan/Hi3Helper.SharpHDiffPatch
+	url = https://github.com/CollapseLauncher/Hi3Helper.SharpHDiffPatch.git

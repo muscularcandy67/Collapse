@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 using static Hi3Helper.Locale;
@@ -172,7 +173,7 @@ namespace Hi3Helper.Shared.Region
         public const long AppDiscordApplicationID_HI3 = 1124126288370737314;
         public const long AppDiscordApplicationID_GI  = 1124137436650426509;
         public const long AppDiscordApplicationID_HSR = 1124153902959431780;
-        //public const long AppDiscordApplicationID_ZZZ = 1124154024879456276;
+        public const long AppDiscordApplicationID_ZZZ = 1124154024879456276;
       
         public const string AppNotifURLPrefix           = "/notification_{0}.json";
         public const string AppGameConfigV2URLPrefix    = "/metadata/metadatav2_{0}.json";
@@ -221,7 +222,12 @@ namespace Hi3Helper.Shared.Region
         public static int AppCurrentDownloadThread => GetAppConfigValue("DownloadThread").ToInt();
         public static string AppGameConfigMetadataFolder { get => Path.Combine(AppGameFolder, "_metadata"); }
         public static string AppGameConfigV2StampPath { get => Path.Combine(AppGameConfigMetadataFolder, "stampv2.json"); }
-        public static string AppGameConfigV2MetadataPath { get => Path.Combine(AppGameConfigMetadataFolder, "metadatav2.json"); }
+        public static string[] AppGameConfigV2MetadataPath
+        {
+            get =>
+                Directory.GetFiles(AppGameConfigMetadataFolder)
+                    .Where(f => f.EndsWith("_metadatav3.json")).ToArray();
+        }
 
 #if !DISABLEDISCORD
         public static DiscordPresenceManager AppDiscordPresence;
