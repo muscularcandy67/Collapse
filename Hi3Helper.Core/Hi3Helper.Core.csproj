@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net8.0</TargetFrameworks>
 		<Platforms>x64</Platforms>
-		<Configurations>Debug;Release;Publish</Configurations>
+		<Configurations>Debug;Release;Publish;Portable</Configurations>
 		<WarningLevel>6</WarningLevel>
 		<LangVersion>preview</LangVersion>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -22,6 +22,10 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Portable|x64'">
+	  <Optimize>False</Optimize>
 	</PropertyGroup>
 
 	<ItemGroup>

@@ -5,7 +5,7 @@
 		<ApplicationIcon>icon.ico</ApplicationIcon>
 		<StartupObject>CollapseLauncher.MainEntryPoint</StartupObject>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<Configurations>Debug;Release;Publish</Configurations>
+		<Configurations>Debug;Release;Publish;Portable</Configurations>
 		<!-- Versioning -->
 		<Version>1.72.11</Version>
 		<LangVersion>preview</LangVersion>
@@ -50,6 +50,11 @@
 		<DefineConstants>DISABLE_XAML_GENERATED_MAIN;ENABLEHTTPREPAIR;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION;PREVIEW;DUMPGIJSON;SIMULATEGIHDR;GSPBYPASSGAMERUNNING</DefineConstants>
 		<DebugType>portable</DebugType>
   </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Portable|x64'">
+	  <DefineConstants>DISABLE_XAML_GENERATED_MAIN;ENABLEHTTPREPAIR;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION;PREVIEW;DUMPGIJSON;SIMULATEGIHDR;GSPBYPASSGAMERUNNING</DefineConstants>
+	  <DebugType>portable</DebugType>
+		<PublishSingleFile>true</PublishSingleFile>
+	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<DefineConstants>DISABLE_XAML_GENERATED_MAIN;ENABLEHTTPREPAIR;DISABLE_XAML_GENERATED_BREAK_ON_UNHANDLED_EXCEPTION;PREVIEW</DefineConstants>
 		<Optimize>True</Optimize>

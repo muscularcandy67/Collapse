@@ -185,7 +185,8 @@ namespace Hi3Helper.Shared.Region
         public static string AppFolder = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
         public static string AppDefaultBG = Path.Combine(AppFolder, "Assets", "Images", "default.png");
         public static string AppLangFolder = Path.Combine(AppFolder, "Lang");
-        public static string AppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "LocalLow", "CollapseLauncher");
+        //public static string AppDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "LocalLow", "CollapseLauncher");
+        public static string AppDataFolder = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
         public static string AppGameFolder
         {
             get => GetAppConfigValue("GameFolder").ToString();
@@ -221,7 +222,12 @@ namespace Hi3Helper.Shared.Region
         public static int AppCurrentDownloadThread => GetAppConfigValue("DownloadThread").ToInt();
         public static string AppGameConfigMetadataFolder { get => Path.Combine(AppGameFolder, "_metadata"); }
         public static string AppGameConfigV2StampPath { get => Path.Combine(AppGameConfigMetadataFolder, "stampv2.json"); }
-        public static string AppGameConfigV2MetadataPath { get => Path.Combine(AppGameConfigMetadataFolder, "metadatav2.json"); }
+        public static string[] AppGameConfigV2MetadataPath
+        {
+            get =>
+                Directory.GetFiles(AppGameConfigMetadataFolder)
+                    .Where(f => f.EndsWith("_metadatav2.json")).ToArray();
+        }
 
 #if !DISABLEDISCORD
         public static DiscordPresenceManager AppDiscordPresence;

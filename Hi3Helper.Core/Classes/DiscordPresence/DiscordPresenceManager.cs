@@ -1,14 +1,18 @@
-﻿#if !DISABLEDISCORD
+#if !DISABLEDISCORD
 using Discord;
+using Hi3Helper;
 using Hi3Helper.Data;
+using Hi3Helper.DiscordPresence;
 using Hi3Helper.Preset;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static Hi3Helper.Locale;
 using static Hi3Helper.Shared.Region.LauncherConfig;
+using Activity = Discord.Activity;
 
 #pragma warning disable CA2007
 namespace Hi3Helper.DiscordPresence
@@ -89,220 +93,235 @@ namespace Hi3Helper.DiscordPresence
                     {
                         // Initialize Discord Presence client and Activity property
                         _client = new Discord.Discord(applicationId, (ulong)CreateFlags.NoRequireDiscord);
-                        if (isInitialStart) _activity = new Activity();
+                        if (isInitialStart) _activity = new Activity
+                        {
+                            Details = StrToByteUtf8($"{Lang._Misc.DiscordRP_Default}"),
+                            Assets = new ActivityAssets
+                            {
+                                LargeImage = StrToByteUtf8($"launcher-logo"),
+#if DEBUG
+                                LargeText = StrToByteUtf8($"Collapse Launcher v{AppCurrentVersionString}d {(IsPreview ? " -PRE" : string.Empty)}")
+#else
+                                LargeText = StrToByteUtf8($"Collapse Launcher v{AppCurrentVersionString} {(IsPreview ? " -PRE" : string.Empty)}")
+#endif
+                            }
+                        };
                         else SetActivity(_activityType);
 
-                        // Initialize the Activity Manager instance
-                        _activityManager = _client.GetActivityManager();
+                // Initialize the Activity Manager instance
+                _activityManager = _client.GetActivityManager();
 
-                        // Initialize the token source if the token is cancelled
-                        if (_clientToken.IsCancellationRequested)
-                        {
-                            _clientToken = new CancellationTokenSource();
-                        }
-                    }
-
-                    // Run .UpdateCallbacks() loop routine, initiate the activity and return
-                    UpdateCallbacksRoutine();
-                    UpdateActivity();
-
-                    Logger.LogWriteLine($"Discord Presence is Enabled!");
-                    return;
+                // Initialize the token source if the token is cancelled
+                if (_clientToken.IsCancellationRequested)
+                {
+                    _clientToken = new CancellationTokenSource();
                 }
+            }
+
+            // Run .UpdateCallbacks() loop routine, initiate the activity and return
+            UpdateCallbacksRoutine();
+            UpdateActivity();
+
+            Logger.LogWriteLine($"Discord Presence is Enabled!");
+            return;
+        }
                 catch (ResultException ex)
                 {
                     Logger.LogWriteLine($"Error initializing Discord Presence. Please ensure that Discord is running! ({ex.GetType().Name}: {ex.Message})", LogType.Warning, true);
                 }
-            }
+}
 
-            Logger.LogWriteLine($"Discord Presence DLL: {dllPath} doesn't exist! The Discord presence feature could not be used.");
+Logger.LogWriteLine($"Discord Presence DLL: {dllPath} doesn't exist! The Discord presence feature could not be used.");
         }
 
         public async void DisablePresence()
-        {
-            Logger.LogWriteLine($"Discord Presence is Disabled!");
-            await DisposeAsync();
-        }
+{
+    Logger.LogWriteLine($"Discord Presence is Disabled!");
+    await DisposeAsync();
+}
 
-        public void SetupPresence(bool isInitialStart = false)
-        {
-            string GameCategory = GetAppConfigValue("GameCategory").ToString();
-            bool IsGameStatusEnabled = GetAppConfigValue("EnableDiscordGameStatus").ToBool();
+public void SetupPresence(bool isInitialStart = false)
+{
+    string GameCategory = GetAppConfigValue("GameCategory").ToString();
+    bool IsGameStatusEnabled = GetAppConfigValue("EnableDiscordGameStatus").ToBool();
 
-            if (IsGameStatusEnabled)
+    if (IsGameStatusEnabled)
+    {
+        lock (_sdkLock)
+        {
+            if (_client != null) Dispose();
+
+            switch (GameCategory)
             {
-                lock (_sdkLock)
-                {
-                    if (_client != null) Dispose();
+                case "Honkai: Star Rail":
+                    EnablePresence(isInitialStart, AppDiscordApplicationID_HSR);
+                    break;
+                case "Honkai Impact 3rd":
+                    EnablePresence(isInitialStart, AppDiscordApplicationID_HI3);
+                    break;
+                case "Genshin Impact":
+                    EnablePresence(isInitialStart, AppDiscordApplicationID_GI);
+                    break;
+                case "Zenless Zone Zero":
+                    EnablePresence(isInitialStart, AppDiscordApplicationID_ZZZ);
+                    break;
+                default:
+                    Logger.LogWriteLine($"Discord Presence (Unknown Game)");
+                    break;
+            }
+        }
+    }
+    else
+    {
+        lock (_sdkLock)
+        {
+            if (_client != null) Dispose();
+            EnablePresence(isInitialStart);
+        }
+    }
+}
 
-                    switch (GameCategory)
+public async void SetActivity(ActivityType activity, int delay = 500)
+{
+    if (GetAppConfigValue("EnableDiscordRPC").ToBool())
+    {
+        await Task.Delay(delay);
+        bool IsGameStatusEnabled = GetAppConfigValue("EnableDiscordGameStatus").ToBool();
+
+        _activityType = activity;
+
+        lock (_sdkLock)
+        {
+            switch (activity)
+            {
+                case ActivityType.Play:
+                    BuildActivityGameStatus(IsGameStatusEnabled ? Lang._Misc.DiscordRP_InGame : Lang._Misc.DiscordRP_Play, IsGameStatusEnabled);
+                    break;
+                case ActivityType.Update:
+                    BuildActivityGameStatus(Lang._Misc.DiscordRP_Update, IsGameStatusEnabled);
+                    break;
+                case ActivityType.Repair:
+                    BuildActivityAppStatus(Lang._Misc.DiscordRP_Repair, IsGameStatusEnabled);
+                    break;
+                case ActivityType.Cache:
+                    BuildActivityAppStatus(Lang._Misc.DiscordRP_Cache, IsGameStatusEnabled);
+                    break;
+                case ActivityType.GameSettings:
+                    BuildActivityAppStatus(Lang._Misc.DiscordRP_GameSettings, IsGameStatusEnabled);
+                    break;
+                case ActivityType.AppSettings:
+                    BuildActivityAppStatus(Lang._Misc.DiscordRP_AppSettings, IsGameStatusEnabled, true);
+                    break;
+                case ActivityType.Idle:
+                    _lastUnixTimestamp = null;
+                    BuildActivityAppStatus(Lang._Misc.DiscordRP_Idle, IsGameStatusEnabled);
+                    break;
+                default:
+                    _activity = new Activity
                     {
-                        case "Honkai: Star Rail":
-                            EnablePresence(isInitialStart, AppDiscordApplicationID_HSR);
-                            break;
-                        case "Honkai Impact 3rd":
-                            EnablePresence(isInitialStart, AppDiscordApplicationID_HI3);
-                            break;
-                        case "Genshin Impact":
-                            EnablePresence(isInitialStart, AppDiscordApplicationID_GI);
-                            break;
-                        default:
-                            Logger.LogWriteLine($"Discord Presence (Unknown Game)");
-                            break;
-                    }
-                }
-            }
-            else
-            {
-                lock (_sdkLock)
-                {
-                    if (_client != null) Dispose();
-                    EnablePresence(isInitialStart);
-                }
-            }
-        }
-
-        public async void SetActivity(ActivityType activity, int delay = 500)
-        {
-            if (GetAppConfigValue("EnableDiscordRPC").ToBool())
-            {
-                await Task.Delay(delay);
-                bool IsGameStatusEnabled = GetAppConfigValue("EnableDiscordGameStatus").ToBool();
-
-                _activityType = activity;
-
-                lock (_sdkLock)
-                {
-                    switch (activity)
-                    {
-                        case ActivityType.Play:
-                            BuildActivityGameStatus(IsGameStatusEnabled ? Lang._Misc.DiscordRP_InGame : Lang._Misc.DiscordRP_Play, IsGameStatusEnabled);
-                            break;
-                        case ActivityType.Update:
-                            BuildActivityGameStatus(Lang._Misc.DiscordRP_Update, IsGameStatusEnabled);
-                            break;
-                        case ActivityType.Repair:
-                            BuildActivityAppStatus(Lang._Misc.DiscordRP_Repair, IsGameStatusEnabled);
-                            break;
-                        case ActivityType.Cache:
-                            BuildActivityAppStatus(Lang._Misc.DiscordRP_Cache, IsGameStatusEnabled);
-                            break;
-                        case ActivityType.GameSettings:
-                            BuildActivityAppStatus(Lang._Misc.DiscordRP_GameSettings, IsGameStatusEnabled);
-                            break;
-                        case ActivityType.AppSettings:
-                            BuildActivityAppStatus(Lang._Misc.DiscordRP_AppSettings, IsGameStatusEnabled);
-                            break;
-                        case ActivityType.Idle:
-                            _lastUnixTimestamp = null;
-                            BuildActivityAppStatus(Lang._Misc.DiscordRP_Idle, IsGameStatusEnabled);
-                            break;
-                        default:
-                            _activity = new Activity
-                                        {
-                                            Details = StrToByteUtf8(Lang._Misc.DiscordRP_Default),
-                                            Assets = new ActivityAssets
-                                                     {
-                                                         LargeImage = StrToByteUtf8($"launcher-logo")
-                                                     }
-                                        };
-                            break;
-                    }
-                }
-
-                if (!_previousActivity.Equals(_activity) && !_clientToken.IsCancellationRequested)
-                {
-                    UpdateActivity();
-                    _previousActivity = _activity;
-                }
-            }
-        }
-
-        private void BuildActivityGameStatus(string activityName, bool isGameStatusEnabled)
-        {
-            _activity = new Activity
-            {
-                Details = StrToByteUtf8($"{activityName} {(!isGameStatusEnabled ? ConfigV2Store.CurrentConfigV2GameCategory : Lang._Misc.DiscordRP_Ad)}"),
-                State = StrToByteUtf8($"{Lang._Misc.DiscordRP_Region} {ConfigV2Store.CurrentConfigV2GameRegion}"),
-                Assets = new ActivityAssets
-                {
-                    LargeImage = StrToByteUtf8($"game-{ConfigV2Store.CurrentConfigV2.GameType.ToString().ToLower()}-logo"),
-                    LargeText = StrToByteUtf8($"{ConfigV2Store.CurrentConfigV2GameCategory} - {ConfigV2Store.CurrentConfigV2GameRegion}"),
-                    SmallImage = StrToByteUtf8($"launcher-logo"),
-                    SmallText = StrToByteUtf8($"Collapse Launcher v{AppCurrentVersionString} {(IsPreview ? "Preview" : "Stable")}")
-                },
-                Timestamps = new ActivityTimestamps
-                {
-                    Start = GetCachedUnixTimestamp()
-                }
-            };
-        }
-
-        private int GetCachedUnixTimestamp()
-        {
-            if (_lastUnixTimestamp == null)
-            {
-                _lastUnixTimestamp = ConverterTool.GetUnixTimestamp(true);
-            }
-
-            return _lastUnixTimestamp ?? 0;
-        }
-
-        private void BuildActivityAppStatus(string activityName, bool isGameStatusEnabled)
-        {
-            _activity = new Activity
-            {
-                Details = StrToByteUtf8($"{activityName} {(!isGameStatusEnabled ? string.Empty : Lang._Misc.DiscordRP_Ad)}"),
-                State = StrToByteUtf8($"{Lang._Misc.DiscordRP_Region} {ConfigV2Store.CurrentConfigV2GameRegion}"),
-                Assets = new ActivityAssets
-                {
-                    LargeImage = StrToByteUtf8($"game-{ConfigV2Store.CurrentConfigV2.GameType.ToString().ToLower()}-logo"),
-                    LargeText = StrToByteUtf8($"{ConfigV2Store.CurrentConfigV2GameCategory}"),
-                    SmallImage = StrToByteUtf8($"launcher-logo"),
-                    SmallText = StrToByteUtf8($"Collapse Launcher v{AppCurrentVersionString} {(IsPreview ? "Preview" : "Stable")}")
-                },
-            };
-        }
-
-        private void UpdateActivity() => _activityManager?.UpdateActivity(_activity, (a) =>
-        {
-            Logger.LogWriteLine($"Activity updated! => {ReadUtf8Byte(_activity.Details)} - {ReadUtf8Byte(_activity.State)}");
-        });
-
-        private void UpdateCallbacksRoutine()
-        {
-            Task.Run(async () =>
-            {
-                while (!_clientToken.IsCancellationRequested)
-                {
-                    lock (_sdkLock)
-                    {
-                        try
+                        Details = StrToByteUtf8(Lang._Misc.DiscordRP_Default),
+                        Assets = new ActivityAssets
                         {
-                            _client?.RunCallbacks();
+                            LargeImage = StrToByteUtf8($"launcher-logo")
                         }
-                        catch (Exception ex)
-                        {
-                            Logger.LogWriteLine($"Discord Presence: {ex.Message}", LogType.Error);
-                        }
-                    }
-
-                    await Task.Delay(_updateInterval);
-                }
-            }, _clientToken.Token);
+                    };
+                    break;
+            }
         }
 
-        private string ReadUtf8Byte(byte[] input) => input == null || input.Length == 0 ? string.Empty : Encoding.UTF8.GetString(input);
-
-        private byte[] StrToByteUtf8(string s)
+        if (!_previousActivity.Equals(_activity) && !_clientToken.IsCancellationRequested)
         {
-            // Use fixed width (128 bytes) as defined in field's SizeConst
-            byte[] bufferOut = new byte[128];
-            // Get the UTF-8 bytes (converting 16-bit (UTF-16) to 8-bit (UTF-8) char (as byte))
-            Encoding.UTF8.GetBytes(s, bufferOut);
-            // return the buffer
-            return bufferOut;
+            UpdateActivity();
+            _previousActivity = _activity;
         }
+    }
+}
+
+private void BuildActivityGameStatus(string activityName, bool isGameStatusEnabled)
+{
+    _activity = new Activity
+    {
+        Details = StrToByteUtf8($"{activityName} {(!isGameStatusEnabled ? ConfigV2Store.CurrentConfigV2GameCategory : Lang._Misc.DiscordRP_Ad)}"),
+        State = StrToByteUtf8($"{Lang._Misc.DiscordRP_Region} {ConfigV2Store.CurrentConfigV2GameRegion}"),
+        Assets = new ActivityAssets
+        {
+            LargeImage = StrToByteUtf8($"game-{ConfigV2Store.CurrentConfigV2.GameType.ToString().ToLower()}-logo"),
+            LargeText = StrToByteUtf8($"{ConfigV2Store.CurrentConfigV2GameCategory} - {ConfigV2Store.CurrentConfigV2GameRegion}"),
+            SmallImage = StrToByteUtf8($"launcher-logo"),
+            SmallText = StrToByteUtf8($"Collapse Launcher v{AppCurrentVersionString} {(IsPreview ? "Preview" : "Stable")}")
+        },
+        Timestamps = new ActivityTimestamps
+        {
+            Start = GetCachedUnixTimestamp()
+        }
+    };
+}
+
+private int GetCachedUnixTimestamp()
+{
+    if (_lastUnixTimestamp == null)
+    {
+        _lastUnixTimestamp = ConverterTool.GetUnixTimestamp(true);
+    }
+
+    return _lastUnixTimestamp ?? 0;
+}
+
+private void BuildActivityAppStatus(string activityName, bool isGameStatusEnabled, bool appSettings = false)
+{
+    _activity = new Activity
+    {
+        Details = StrToByteUtf8($"{(!appSettings ? ConfigV2Store.CurrentConfigV2GameCategory + " - " : string.Empty)} {activityName} {(isGameStatusEnabled ? Lang._Misc.DiscordRP_Ad : string.Empty)}"),
+        State = appSettings ? null : StrToByteUtf8($"{Lang._Misc.DiscordRP_Region} {ConfigV2Store.CurrentConfigV2GameRegion}"),
+        Assets = new ActivityAssets
+        {
+            LargeImage = StrToByteUtf8(appSettings ? $"launcher-logo" : $"game-{ConfigV2Store.CurrentConfigV2.GameType.ToString().ToLower()}-logo"),
+            LargeText = StrToByteUtf8($"{ConfigV2Store.CurrentConfigV2GameCategory}"),
+            SmallImage = appSettings ? null : StrToByteUtf8($"launcher-logo"),
+            SmallText = appSettings ? null : StrToByteUtf8($"Collapse Launcher v{AppCurrentVersionString} {(IsPreview ? "Preview" : "Stable")}")
+        },
+    };
+}
+
+private void UpdateActivity() => _activityManager?.UpdateActivity(_activity, (a) =>
+{
+    Logger.LogWriteLine($"Activity updated! => {ReadUtf8Byte(_activity.Details)} - {ReadUtf8Byte(_activity.State)}");
+});
+
+private void UpdateCallbacksRoutine()
+{
+    Task.Run(async () =>
+    {
+        while (!_clientToken.IsCancellationRequested)
+        {
+            lock (_sdkLock)
+            {
+                try
+                {
+                    _client?.RunCallbacks();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogWriteLine($"Discord Presence: {ex.Message}", LogType.Error);
+                }
+            }
+
+            await Task.Delay(_updateInterval);
+        }
+    }, _clientToken.Token);
+}
+
+private string ReadUtf8Byte(byte[] input) => input == null || input.Length == 0 ? string.Empty : Encoding.UTF8.GetString(input);
+
+private byte[] StrToByteUtf8(string s)
+{
+    // Use fixed width (128 bytes) as defined in field's SizeConst
+    byte[] bufferOut = new byte[128];
+    // Get the UTF-8 bytes (converting 16-bit (UTF-16) to 8-bit (UTF-8) char (as byte))
+    Encoding.UTF8.GetBytes(s, bufferOut);
+    // return the buffer
+    return bufferOut;
+}
     }
 }
 #endif
