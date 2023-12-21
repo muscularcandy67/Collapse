@@ -49,8 +49,8 @@ namespace CollapseLauncher
 
             if (!IsCustomBG || IsFirstStartup)
             {
-                BackgroundImgChanger.ChangeBackground(regionBackgroundProp.imgLocalPath, IsCustomBG);
-                await BackgroundImgChanger.WaitForBackgroundToLoad();
+                BackgroundAssetChanger.ChangeBackground(regionBackgroundProp.imgLocalPath, IsCustomBG);
+                await BackgroundAssetChanger.WaitForBackgroundToLoad();
             }
 
             IsFirstStartup = false;

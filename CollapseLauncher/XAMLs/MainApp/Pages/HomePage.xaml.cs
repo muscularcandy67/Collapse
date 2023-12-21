@@ -73,6 +73,11 @@ namespace CollapseLauncher.Pages
                 _refreshRate = value;
             }
         }
+
+        /// <summary>
+        /// Hold cached state for IsGameRunning. The state is controlled inside CheckRunningGameInstance() method.
+        /// </summary>
+        public static bool _cachedIsGameRunning { get; set; }
         #endregion
 
         #region PageMethod
@@ -115,7 +120,7 @@ namespace CollapseLauncher.Pages
 
                 this.InitializeComponent();
 
-                BackgroundImgChanger.ToggleBackground(false);
+                BackgroundAssetChanger.ToggleBackground(false);
                 CheckIfRightSideProgress();
                 GetCurrentGameState();
 
@@ -272,12 +277,12 @@ namespace CollapseLauncher.Pages
             catch (Exception) { }
         }
 
-        private void CarouselStopScroll(object sender, PointerRoutedEventArgs e) => CarouselToken.Cancel();
+        public void CarouselStopScroll(object sender = null, PointerRoutedEventArgs e = null) => CarouselToken.Cancel();
 
-        private void CarouselRestartScroll(object sender, PointerRoutedEventArgs e)
+        public void CarouselRestartScroll(object sender = null, PointerRoutedEventArgs e = null)
         {
             // Don't restart carousel if game is running and LoPrio is on
-            if (!CurrentGameProperty.IsGameRunning || !GetAppConfigValue("LowerCollapsePrioOnGameLaunch").ToBool())
+            if (!_cachedIsGameRunning || !GetAppConfigValue("LowerCollapsePrioOnGameLaunch").ToBool())
             {
                 CarouselToken = new CancellationTokenSource();
                 StartCarouselAutoScroll(CarouselToken.Token);
@@ -788,6 +793,8 @@ namespace CollapseLauncher.Pages
                 {
                     while (CurrentGameProperty.IsGameRunning)
                     {
+                        _cachedIsGameRunning = true;
+                            
                         if (StartGameBtn.IsEnabled)
                             LauncherBtn.Translation -= Shadow16;
 
@@ -811,6 +818,8 @@ namespace CollapseLauncher.Pages
                         await Task.Delay(RefreshRate, Token);
                     }
 
+                    _cachedIsGameRunning = false;
+                    
                     if (!StartGameBtn.IsEnabled)
                         LauncherBtn.Translation += Shadow16;
 
@@ -1219,7 +1228,7 @@ namespace CollapseLauncher.Pages
                 switch (GetAppConfigValue("GameLaunchedBehavior").ToString())
                 {
                     case "Minimize":
-                        m_presenter.Minimize();
+                        (m_window as MainWindow).Minimize();
                         break;
                     case "ToTray":
                         H.NotifyIcon.WindowExtensions.Hide(m_window);
@@ -1228,7 +1237,7 @@ namespace CollapseLauncher.Pages
                     case "Nothing":
                         break;
                     default:
-                        m_presenter.Minimize();
+                        (m_window as MainWindow).Minimize();
                         break;
                 }
 
@@ -1268,7 +1277,7 @@ namespace CollapseLauncher.Pages
         private async void GameRunningWatcher()
         {
             await Task.Delay(5000);
-            while (CurrentGameProperty.IsGameRunning)
+            while (_cachedIsGameRunning)
             {
                 await Task.Delay(3000);
             }
@@ -1281,16 +1290,16 @@ namespace CollapseLauncher.Pages
             switch (GetAppConfigValue("GameLaunchedBehavior").ToString())
             {
                 case "Minimize":
-                    m_presenter.Restore();
+                    (m_window as MainWindow).Restore();
                     break;
                 case "ToTray":
                     H.NotifyIcon.WindowExtensions.Show(m_window);
-                    m_presenter.Restore();
+                    (m_window as MainWindow).Restore();
                     break;
                 case "Nothing":
                     break;
                 default:
-                    m_presenter.Restore();
+                    (m_window as MainWindow).Restore();
                     break;
             }
         }
@@ -1535,7 +1544,7 @@ namespace CollapseLauncher.Pages
             catch (OperationCanceledException)
             {
                 LogWriteLine($"{new string('=', barwidth)} GAME STOPPED {new string('=', barwidth)}", LogType.Warning, true);
-                m_presenter.Restore();
+                (m_window as MainWindow).Restore();
             }
             catch (Exception ex)
             {
@@ -1629,7 +1638,7 @@ namespace CollapseLauncher.Pages
         #region Playtime Buttons
         private void ForceUpdatePlaytimeButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!CurrentGameProperty.IsGameRunning)
+            if (!_cachedIsGameRunning)
             {
                 UpdatePlaytime();
             }
@@ -1779,7 +1788,7 @@ namespace CollapseLauncher.Pages
 
                 if (!dynamicUpdate)
                 {
-                    while (CurrentGameProperty.IsGameRunning) { }
+                    while (_cachedIsGameRunning) { }
                     UpdatePlaytime();
                     return;
                 }
@@ -1788,7 +1797,7 @@ namespace CollapseLauncher.Pages
 
                 if (bootByCollapse)
                 {
-                    while (CurrentGameProperty.IsGameRunning)
+                    while (_cachedIsGameRunning)
                     {
                         await Task.Delay(60000, token);
                         elapsedSeconds += 60;
@@ -1798,7 +1807,7 @@ namespace CollapseLauncher.Pages
                     return;
                 }
 
-                if (CurrentGameProperty.IsGameRunning)
+                if (_cachedIsGameRunning)
                 {
                     await Task.Delay(60000, token);
                     int newTime = ReadPlaytimeFromRegistry(regionKey);
@@ -1808,7 +1817,7 @@ namespace CollapseLauncher.Pages
 
                 }
 
-                while (CurrentGameProperty.IsGameRunning)
+                while (_cachedIsGameRunning)
                 {
                     UpdatePlaytime(false, oldTime + elapsedSeconds);
                     elapsedSeconds += 60;
@@ -1934,7 +1943,7 @@ namespace CollapseLauncher.Pages
                     LogWriteLine($"Collapse process [PID {collapseProcess.Id}] priority is set to Below Normal, PriorityBoost is off, carousel is temporarily stopped", LogType.Default, true);
                 }
 
-                CarouselStopScroll(null, null);
+                CarouselStopScroll();
                 await proc.WaitForExitAsync();
 
                 using (Process collapseProcess = Process.GetCurrentProcess())
@@ -1943,7 +1952,7 @@ namespace CollapseLauncher.Pages
                     collapseProcess.PriorityClass = ProcessPriorityClass.Normal;
                     LogWriteLine($"Collapse process [PID {collapseProcess.Id}] priority is set to Normal, PriorityBoost is on, carousel is started", LogType.Default, true);
                 }
-                CarouselRestartScroll(null, null);
+                CarouselRestartScroll();
             }
             catch (Exception ex)
             {

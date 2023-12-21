@@ -185,7 +185,7 @@ namespace CollapseLauncher
 
         private void ShowLoadingPageInvoker_PageEvent(object sender, ShowLoadingPageProperty e)
         {
-            BackgroundImgChanger.ToggleBackground(e.Hide);
+            BackgroundAssetChanger.ToggleBackground(e.Hide);
             HideLoadingPopup(e.Hide, e.Title, e.Subtitle);
         }
 
@@ -346,7 +346,7 @@ namespace CollapseLauncher
             BackgroundAcrylicMask.Visibility = Visibility.Visible;
         }
 
-        public static void ReloadPageTheme(Page page, ElementTheme startTheme)
+        public static void ReloadPageTheme(FrameworkElement page, ElementTheme startTheme)
         {
             bool IsComplete = false;
             while (!IsComplete)
@@ -386,12 +386,12 @@ namespace CollapseLauncher
         #endregion
 
         #region Background Image
-        private void BackgroundImg_IsImageHideEvent(object sender, bool e) => HideBackgroundImage(e);
+        private void BackgroundIsBgHideEvent(object sender, bool e) => HideBackgroundImage(e);
 
-        private async void CustomBackgroundChanger_Event(object sender, BackgroundImgProperty e)
+        private async void CustomBackgroundChanger_Event(object sender, BackgroundAssetProperty e)
         {
-            e.IsImageLoaded                   = false;
-            regionBackgroundProp.imgLocalPath = e.ImgPath;
+            e.IsAssetLoaded                   = false;
+            regionBackgroundProp.imgLocalPath = e.CustomBgPath;
             IsCustomBG                        = e.IsCustom;
 
             if (e.IsCustom)
@@ -399,7 +399,7 @@ namespace CollapseLauncher
 
             if (!File.Exists(regionBackgroundProp.imgLocalPath))
             {
-                LogWriteLine($"Custom background file {e.ImgPath} is missing!", LogType.Warning, true);
+                LogWriteLine($"Custom background file {e.CustomBgPath} is missing!", LogType.Warning, true);
                 regionBackgroundProp.imgLocalPath = AppDefaultBG;
             }
 
@@ -410,10 +410,10 @@ namespace CollapseLauncher
             catch (Exception ex)
             {
                 regionBackgroundProp.imgLocalPath = AppDefaultBG;
-                LogWriteLine($"An error occured while loading background {e.ImgPath}\r\n{ex}", LogType.Error, true);
+                LogWriteLine($"An error occured while loading background {e.CustomBgPath}\r\n{ex}", LogType.Error, true);
             }
 
-            e.IsImageLoaded = true;
+            e.IsAssetLoaded = true;
         }
         #endregion
 
@@ -423,8 +423,8 @@ namespace CollapseLauncher
             ErrorSenderInvoker.ExceptionEvent += ErrorSenderInvoker_ExceptionEvent;
             MainFrameChangerInvoker.FrameEvent += MainFrameChangerInvoker_FrameEvent;
             NotificationInvoker.EventInvoker += NotificationInvoker_EventInvoker;
-            BackgroundImgChangerInvoker.ImgEvent += CustomBackgroundChanger_Event;
-            BackgroundImgChangerInvoker.IsImageHide += BackgroundImg_IsImageHideEvent;
+            BackgroundAssetChangerInvoker.BgEvent += CustomBackgroundChanger_Event;
+            BackgroundAssetChangerInvoker.IsBgHide += BackgroundIsBgHideEvent;
             SpawnWebView2Invoker.SpawnEvent += SpawnWebView2Invoker_SpawnEvent;
             ShowLoadingPageInvoker.PageEvent += ShowLoadingPageInvoker_PageEvent;
             ChangeTitleDragAreaInvoker.TitleBarEvent += ChangeTitleDragAreaInvoker_TitleBarEvent;
@@ -438,8 +438,8 @@ namespace CollapseLauncher
             ErrorSenderInvoker.ExceptionEvent -= ErrorSenderInvoker_ExceptionEvent;
             MainFrameChangerInvoker.FrameEvent -= MainFrameChangerInvoker_FrameEvent;
             NotificationInvoker.EventInvoker -= NotificationInvoker_EventInvoker;
-            BackgroundImgChangerInvoker.ImgEvent -= CustomBackgroundChanger_Event;
-            BackgroundImgChangerInvoker.IsImageHide -= BackgroundImg_IsImageHideEvent;
+            BackgroundAssetChangerInvoker.BgEvent -= CustomBackgroundChanger_Event;
+            BackgroundAssetChangerInvoker.IsBgHide -= BackgroundIsBgHideEvent;
             SpawnWebView2Invoker.SpawnEvent -= SpawnWebView2Invoker_SpawnEvent;
             ShowLoadingPageInvoker.PageEvent -= ShowLoadingPageInvoker_PageEvent;
             ChangeTitleDragAreaInvoker.TitleBarEvent -= ChangeTitleDragAreaInvoker_TitleBarEvent;

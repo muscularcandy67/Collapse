@@ -5,7 +5,7 @@
 
 ##### GI Nahida Background Credit: [Rafa on Pixiv](https://www.pixiv.net/en/users/3970196)
 
-[![jp](https://img.shields.io/badge/README-jp-red.svg)](https://github.com/neon-nyan/Collapse/blob/main/README.ja-jp.md) [![id](https://img.shields.io/badge/README-id-red.svg)](https://github.com/neon-nyan/Collapse/blob/main/README.id-id.md) [![pt](https://img.shields.io/badge/README-pt-red.svg)](https://github.com/neon-nyan/Collapse/blob/main/README.pt-pt.md)
+[![jp](https://img.shields.io/badge/README-jp-red.svg)](https://github.com/neon-nyan/Collapse/blob/main/README.ja-jp.md) [![id](https://img.shields.io/badge/README-id-red.svg)](https://github.com/neon-nyan/Collapse/blob/main/README.id-id.md) [![pt](https://img.shields.io/badge/README-pt-red.svg)](https://github.com/neon-nyan/Collapse/blob/main/README.pt-pt.md) [![fr](https://img.shields.io/badge/README-fr-red.svg)](https://github.com/neon-nyan/Collapse/blob/main/README.fr-fr.md)
 
 **Collapse** was originally designed for **Honkai Impact 3rd**. However, as the project evolved, this launcher is now a game client for all currently released **miHoYo Games**.
 
@@ -133,7 +133,7 @@ Not only that, this launcher also has some advanced features for **Genshin Impac
       <td>N/A</td>
     </tr>
     <tr>
-      <td rowspan="2">Genshin Impact</td>
+      <td rowspan="3">Genshin Impact</td>
       <td>Global</td>
       <td>:white_check_mark:</td>
       <td>:white_check_mark:</td>
@@ -154,7 +154,17 @@ Not only that, this launcher also has some advanced features for **Genshin Impac
       <td>N/A</td>
     </tr>
     <tr>
-      <td rowspan="2">Honkai: Star Rail</td>
+      <td>Bilibili</td>
+      <td>:white_check_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>N/A</td>
+      <td>:white_check_mark:</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td rowspan="3">Honkai: Star Rail</td>
       <td>Global</td>
       <td>:white_check_mark:</td>
       <td>:white_check_mark:</td>
@@ -166,6 +176,16 @@ Not only that, this launcher also has some advanced features for **Genshin Impac
     </tr>
     <tr>
       <td>Mainland China</td>
+      <td>:white_check_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>:white_check_mark:</td>
+      <td>N/A</td>
+    </tr>
+    <tr>
+      <td>Bilibili</td>
       <td>:white_check_mark:</td>
       <td>:white_check_mark:</td>
       <td>:white_check_mark:</td>
@@ -237,6 +257,7 @@ Made by all captains around the world with ❤️. Fight for all that is beautif
       <td align="center" valign="top" width="14.28%"><a href="https://prophost.ironmaid.xyz"><img src="https://avatars.githubusercontent.com/u/30566970?v=4?s=100" width="100px;" alt="Kemal Setya Adhi"/><br /><sub><b>Kemal Setya Adhi</b></sub></a><br /><a href="#code-neon-nyan" title="Code">💻</a> <a href="#design-neon-nyan" title="Design">🎨</a> <a href="#mentoring-neon-nyan" title="Mentoring">🧑‍🏫</a> <a href="#maintenance-neon-nyan" title="Maintenance">🚧</a> <a href="#review-neon-nyan" title="Reviewed Pull Requests">👀</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://ronfriedman.dev"><img src="https://avatars.githubusercontent.com/u/9833218?v=4?s=100" width="100px;" alt="Ron Friedman"/><br /><sub><b>Ron Friedman</b></sub></a><br /><a href="#code-Cryotechnic" title="Code">💻</a> <a href="#maintenance-Cryotechnic" title="Maintenance">🚧</a> <a href="#review-Cryotechnic" title="Reviewed Pull Requests">👀</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/gablm"><img src="https://avatars.githubusercontent.com/u/44784408?v=4?s=100" width="100px;" alt="Gabriel Lima"/><br /><sub><b>Gabriel Lima</b></sub></a><br /><a href="#code-gablm" title="Code">💻</a> <a href="#translation-gablm" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/shatyuka"><img src="https://avatars.githubusercontent.com/u/31368738?v=4?s=100" width="100px;" alt="Shatyuka"/><br /><sub><b>Shatyuka</b></sub></a><br /><a href="#code-shatyuka" title="Code">💻</a> <a href="#translation-shatyuka" title="Translation">🌍</a></td>
     </tr>
   </tbody>
 </table>

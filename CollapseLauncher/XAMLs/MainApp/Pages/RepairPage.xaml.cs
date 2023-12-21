@@ -22,7 +22,7 @@ namespace CollapseLauncher.Pages
         public RepairPage()
         {
             CurrentGameProperty = GetCurrentGameProperty();
-            BackgroundImgChanger.ToggleBackground(true);
+            BackgroundAssetChanger.ToggleBackground(true);
             this.InitializeComponent();
 #if !DISABLEDISCORD
             AppDiscordPresence.SetActivity(ActivityType.Repair);

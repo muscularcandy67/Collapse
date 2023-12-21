@@ -25,7 +25,7 @@ namespace CollapseLauncher.Pages
             CurrentGameProperty = GamePropertyVault.GetCurrentGameProperty();
 
             this.InitializeComponent();
-            BackgroundImgChanger.ToggleBackground(true);
+            BackgroundAssetChanger.ToggleBackground(true);
 #if !DISABLEDISCORD
             AppDiscordPresence.SetActivity(ActivityType.Cache);
 #endif

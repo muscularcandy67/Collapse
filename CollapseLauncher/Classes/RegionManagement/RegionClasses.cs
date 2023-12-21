@@ -38,10 +38,12 @@ namespace CollapseLauncher
     {
         public RegionResourceGame data { get; set; }
         public string imgLocalPath { get; set; } = string.Empty;
+        public string vidLocalPath { get; set; } = string.Empty; 
         public RegionResourceProp Copy() => new RegionResourceProp()
         {
             data = data?.Copy(),
-            imgLocalPath = imgLocalPath
+            imgLocalPath = imgLocalPath,
+            vidLocalPath = vidLocalPath
         };
     }
 
