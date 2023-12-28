@@ -1,4 +1,4 @@
-﻿using ColorThiefDotNet;
+using ColorThiefDotNet;
 using Hi3Helper;
 using Hi3Helper.Data;
 using Hi3Helper.Preset;
@@ -14,7 +14,10 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Media.Core;
+using Windows.Media.Playback;
 using Windows.Storage.Streams;
+using Microsoft.Graphics.Canvas.UI.Xaml;
 using static CollapseLauncher.InnerLauncherConfig;
 using static CollapseLauncher.RegionResourceListHelper;
 using static Hi3Helper.Logger;
@@ -30,13 +33,33 @@ namespace CollapseLauncher
         private Bitmap PaletteBitmap;
         private bool BGLastState = true;
         private bool IsFirstStartup = true;
+        
+        private MediaPlayer? _mediaPlayer;
+        private CanvasImageSource? videoSource;
+        public bool IsPlayingVideo { get; private set; }
 
         internal async void ChangeBackgroundImageAsRegionAsync(bool ShowLoadingMsg = false)
         {
             IsCustomBG = GetAppConfigValue("UseCustomBG").ToBool();
+            
+            _mediaPlayer?.Dispose();
+            _mediaPlayer = null;
+            videoSource = null;
+            
             if (IsCustomBG)
             {
                 string BGPath = GetAppConfigValue("CustomBGPath").ToString();
+                var bgExtension = Path.GetExtension(BGPath).ToLower();
+                if (bgExtension is ".mp4")
+                {
+                    regionBackgroundProp.vidLocalPath = string.IsNullOrEmpty(BGPath) ? AppDefaultBG : BGPath;
+                    _mediaPlayer = new MediaPlayer();
+                    _mediaPlayer.IsLoopingEnabled = true;
+                    _mediaPlayer.Volume = 0;
+                    _mediaPlayer.IsVideoFrameServerEnabled = false;
+                    _mediaPlayer.Source = MediaSource.CreateFromUri(new Uri(regionBackgroundProp.vidLocalPath));
+                    _mediaPlayer.Play();
+                }
                 regionBackgroundProp.imgLocalPath = string.IsNullOrEmpty(BGPath) ? AppDefaultBG : BGPath;
             }
             else
@@ -229,9 +252,14 @@ namespace CollapseLauncher
             {
                 try
                 {
-                    if (!isCachedFileExist)
+                    if (!isCachedFileExist || cachedFileInfo.Extension is not ".mp4") // should have a better way of checking
                     {
                         await GetResizedImageStream(stream, cachedFileStream, ToWidth, ToHeight);
+                    }
+
+                    if (cachedFileInfo.Extension is ".mp4")
+                    {
+                        // await GetResizedVideoStream(stream, cachedFileStream, ToWidth, ToHeight);
                     }
 
                     bitmapRet = await Task.Run(() => Stream2Bitmap(cachedFileStream.AsRandomAccessStream()));
