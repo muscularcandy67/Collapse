@@ -71,12 +71,32 @@ namespace CollapseLauncher.GameSettings.Honkai
         /// </summary>
         public SelectLightningQuality LightingQuality { get; set; } = SelectLightningQuality.Low;
 
+        /// <summary>
+        /// This defines "<c>Post FX Quality</c>" combobox In-game settings -> Video.<br/>
+        /// <inheritdoc cref="SelectPostFXQuality"/>
+        /// Default: LOW
+        /// </summary>
         public SelectPostFXQuality PostFXQuality { get; set; } = SelectPostFXQuality.Low;
 
+        /// <summary>
+        /// This defines "<c>Anti Aliasing</c>" combobox In-game settings -> Video.<br/>
+        /// <inheritdoc cref="SelectAAType"/>
+        /// Default: FXAA
+        /// </summary>
         public SelectAAType AAType { get; set; } = SelectAAType.FXAA;
 
+        /// <summary>
+        /// This defines "<c>Character Quality</c>" combobox In-game settings -> Video.<br/>
+        /// <inheritdoc cref="SelectCharacterQuality"/>
+        /// Default: Low
+        /// </summary>
         public SelectCharacterQuality CharacterQuality { get; set; } = SelectCharacterQuality.Low;
 
+        /// <summary>
+        /// This defines "<c>Weather Quality</c>" combobox In-game settings -> Video.<br/>
+        /// <inheritdoc cref="SelectWeatherQuality"/>
+        /// Default: Low
+        /// </summary>
         public SelectWeatherQuality WeatherQuality { get; set; } = SelectWeatherQuality.Low;
         
         /// <summary>
