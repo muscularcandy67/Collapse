@@ -96,6 +96,7 @@
     "NavCtrlTitleSettings": "Ajustes de la Aplicación",
     "NotifNeverAsk": "No mostrar de nuevo",
     "NotifNoNewNotifs": "No hay nuevas notificaciones",
+    "NotifClearAll": "Limpiar todas las notificaciones ",
     "NavigationMenu": "Menú",
     "NavigationUtilities": "Utilidades"
   },
@@ -187,6 +188,8 @@
     "Status11": "Esperando a que se inicie el proceso de reparación...",
     "Status12": "Actualizando Audio: {0}",
     "Status13": "Actualizando Bloque: {0}",
+    "Status14": "Determinando disponibilidad de archivos CG: {0} ",
+    "Status15": "Determinando disponibilidad de archivos de Audio: {0}",
     "StatusNone": "Nada",
     "PerProgressTitle1": "Progreso Del Archivo",
     "PerProgressSubtitle1": "Esperando...",
@@ -398,6 +401,14 @@
     "AppThreads_Help5": "Este thread manejará el proceso de extracción/verificación mientras se instala/repara el juego.",
     "AppThreads_Help6": "Aviso: Esta configuración ya no funciona al instalar Honkai Impact 3rd.",
 
+    "AppThreads_Attention": "Precaución",
+    "AppThreads_Attention1": "Antes de cambiar el valor de los",
+    "AppThreads_Attention2": ", por favor considera ",
+    "AppThreads_Attention3": "NO MODIFICAR",
+    "AppThreads_Attention4": "el valor si tienes una descarga existente, ya que podría ",
+    "AppThreads_Attention5": "REINICIAR LA DESCARGA COMPLETA",
+    "AppThreads_Attention6": "debido a que generaran diferencias durante el conteo de la sesión.",
+
     "DiscordRPC": "Estado de actividad en Discord (Rich Presence)",
     "DiscordRPC_Toggle": "Mostrar Presencia de Discord",
     "DiscordRPC_GameStatusToggle": "Mostrar el juego actual en el estado de Discord",
@@ -428,7 +439,7 @@
 
     "About": "Acerca de",
     "About_Copyright1": "© 2022-2024",
-    "About_Copyright2": " neon-nyan, Cry0, bagusnl,\r\n shatyuka, gablm",
+    "About_Copyright2": " neon-nyan, Cry0, bagusnl,\r\n shatyuka & gablm",
     "About_Copyright3": "Bajo",
     "About_Copyright4": ". Todos los derechos reservados.",
 
@@ -466,11 +477,14 @@
     "Waifu2X_Toggle": "Usar Waifu2X [Experimental]",
     "Waifu2X_Help": "Usa Waifu2X para escalar imágenes de fondo.\nCuando está activado, la calidad de la imagen mejora significativamente, pero tardará en cargar la imagen la primera vez.",
     "Waifu2X_Warning_CpuMode": "ADVERTENCIA: No se encontró un dispositivo Vulkan GPU disponible, se usara el modo CPU. Esto aumentara considerablemente el tiempo de procesamiento de la imagen.",
+    "Waifu2X_Warning_D3DMappingLayers": "ADVERTENCIA: Tu sistema tiene instalado el \"Paquete de compatibilidad de OpenCL™, OpenGL® y Vulkan®\", el cual fue reportado de ser incompatible con el Vulkan Loader. Por favor remueva este paquete para habilitar el modo GPU",
     "Waifu2X_Error_Loader": "ERROR: Fallo al inicializar el Vulkan Loader. Asegúrate de que tienes una GPU compatible con Vulkan y su respetivo Driver instalado.",
-    "Waifu2X_Error_Output": "ERROR: Fallo al realizar la comprobación de Waifu2X, se obtuvo un output vacío."
+    "Waifu2X_Error_Output": "ERROR: Fallo en la comprobación de Waifu2X, se obtuvo una imagen vacía de salida."
   },
 
   "_Misc": {
+    "SizePrefixes1000U": "B|KB|MB|GB|TB|PB|EB|ZB|YB",
+
     "UpdateCompleteTitle": "¡Actualización Completada!",
     "UpdateCompleteSubtitle": "¡Su versión del launcher ha sido actualizada a {0}! (Canal de Lanzamiento: {1})",
     "FeatureUnavailableTitle": "Esta característica no está disponible en este momento",
@@ -741,6 +755,7 @@
     "ShortcutCreationSuccessSubtitle2": "Ubicación: ",
     "ShortcutCreationSuccessSubtitle3": "Aviso: ",
     "ShortcutCreationSuccessSubtitle4": " • Este acceso directo iniciará el juego después de cargar la región",
+    "ShortcutCreationSuccessSubtitle5": " • Si el juego no está instalado/actualizado, Collapse intentará instalarlo/actualizarlo. Ten en cuenta que mensajes relacionados con estos procesos se seguirán mostrando.",
 
     "SteamShortcutCreationConfirmTitle": "¿Estas seguro que quieres continuar?",
     "SteamShortcutCreationConfirmSubtitle1": "Un acceso directo será añadido a todos los usuarios de Steam en este computador",
@@ -753,9 +768,13 @@
     "SteamShortcutCreationSuccessSubtitle4": " • Realizar el proceso otra vez arreglara cualquier imagen corrupta/faltante del acceso directo.",
     "SteamShortcutCreationSuccessSubtitle5": " • El acceso directo solo se mostrara después de reiniciar Steam.",
     "SteamShortcutCreationSuccessSubtitle6": " • Para usar el Steam overlay, es necesario iniciar Steam como administrador y Collapse debe estar cerrado completamente o tener la opción \"Multiples Ventanas\" habilitada en los ajustes.",
+    "SteamShortcutCreationSuccessSubtitle7": " • Si el juego no está instalado/actualizado, Collapse intentará instalarlo/actualizarlo. Ten en cuenta que mensajes relacionados con estos procesos se seguirán mostrando.",
 
     "SteamShortcutCreationFailureTitle": "Carpeta de datos de Steam inválida",
-    "SteamShortcutCreationFailureSubtitle": "No fue posible encontrar una carpeta \"userdata\" válida.\n\nPor favor, verifica que has iniciado sesión al menos una vez en el cliente de Steam antes de usar esta función."
+    "SteamShortcutCreationFailureSubtitle": "No fue posible encontrar una carpeta \"userdata\" válida.\n\nPor favor, verifica que has iniciado sesión al menos una vez en el cliente de Steam antes de usar esta función.",
+
+    "DownloadSettingsTitle": "Descargando Configuración",
+    "DownloadSettingsOption1": "Iniciar el juego después de instalar "
   },
 
   "_FileMigrationProcess": {
@@ -805,6 +824,8 @@
     "ConvertSuccessSubtitle": "¡La conversión de {0} a {1} se completo con éxito!",
     "CookbookDownloadTitle": "Descargando Receta",
     "CookbookDownloadSubtitle": "Descargando receta para conversión de {0} a {1}",
+
+    "CookbookFileBrowserFileTypeCategory": "{0} a {1} Cookbook",
 
     "CancelBtn": "Cancelar Conversión",
     "CancelMsgTitle": "Cancelando Conversión...",
@@ -1168,7 +1189,11 @@
     "ChangeShortcut_Help1": "Un atajo está compuesto por 2 partes:",
     "ChangeShortcut_Help2": "・ Modificador - Shift, Control o Alt/Menu",
     "ChangeShortcut_Help3": "・ Clave - Alfabético (A a Z) o Tab",
-    "ChangeShortcut_Help4": "Puede elegir cualquier combinación que consista en un valor de cada categoría, a menos que esté reservado por el sistema o ya esté siendo utilizado."
+    "ChangeShortcut_Help4": "Puede elegir cualquier combinación que consista en un valor de cada categoría, a menos que esté reservado por el sistema o ya esté siendo utilizado.",
+
+    "Keyboard_Control": "Ctrl",
+    "Keyboard_Menu": "Alt",
+    "Keyboard_Shift": "Shift"
   },
 
   "_GameClientTitles": {
