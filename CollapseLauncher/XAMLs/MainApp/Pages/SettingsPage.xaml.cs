@@ -40,7 +40,10 @@ namespace CollapseLauncher.Pages
     public sealed partial class SettingsPage : Page
     {
         #region Properties
-        private readonly string _collapseStartupTaskName = "CollapseLauncherStartupTask";
+
+        private const string _collapseStartupTaskName = "CollapseLauncherStartupTask";
+        private const string RepoUrl = "https://github.com/CollapseLauncher/Collapse/commit/";
+
         #endregion
 
         #region Settings Page Handler
@@ -64,9 +67,12 @@ namespace CollapseLauncher.Pages
 
             AppVersionTextBlock.Text = Version;
             CurrentVersion.Text = Version;
-
-            // TODO: Eventually, we should make this a button which copies on click, but this works for now
-            GitVersionIndicator.Text = $"{ThisAssembly.Git.Branch} - {ThisAssembly.Git.Commit}";
+            
+            GitVersionIndicator.Text = GitVersionIndicator_Builder();
+            GitVersionIndicator_Hyperlink.NavigateUri = 
+                new Uri(new StringBuilder()
+                    .Append(RepoUrl)
+                    .Append(ThisAssembly.Git.Sha).ToString());
 
             if (IsAppLangNeedRestart)
                 AppLangSelectionWarning.Visibility = Visibility.Visible;
@@ -83,6 +89,25 @@ namespace CollapseLauncher.Pages
             UpdateBindingsInvoker.UpdateEvents += UpdateBindingsEvents;
         }
 
+        private string GitVersionIndicator_Builder()
+        {
+            var branchName = ThisAssembly.Git.Branch;
+            var commitShort = ThisAssembly.Git.Commit;
+
+            // Add indicator if the commit is dirty
+            // CS0162: Unreachable code detected
+#pragma warning disable CS0162
+            if (ThisAssembly.Git.IsDirty) commitShort = $"{commitShort}*";
+#pragma warning restore CS0162
+
+            var outString =
+                // If branch is not HEAD, show branch name and short commit
+                // Else, show full SHA 
+                branchName == "HEAD" ? ThisAssembly.Git.Sha : $"{branchName} - {commitShort}";
+
+            return outString;
+        }
+        
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             BackgroundImgChanger.ToggleBackground(true);
@@ -129,7 +154,7 @@ namespace CollapseLauncher.Pages
                         if (collapsePath == null || AppGameConfigMetadataFolder == null) return;
                         Directory.Delete(AppGameConfigMetadataFolder, true);
                         Process.Start(collapsePath);
-                        Application.Current.Exit();
+                        (m_window as MainWindow)?.CloseApp();
                     }
                     catch (Exception ex)
                     {
@@ -237,7 +262,7 @@ namespace CollapseLauncher.Pages
                         Verb = "runas"
                     }
                 }.Start();
-                Application.Current.Exit();
+                (m_window as MainWindow)?.CloseApp();
             }
             catch
             {
@@ -302,6 +327,7 @@ namespace CollapseLauncher.Pages
 
         private void ClickTextLinkFromTag(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
         {
+            if (!e.GetCurrentPoint((UIElement)sender).Properties.IsLeftButtonPressed) return;
             new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -564,7 +590,10 @@ namespace CollapseLauncher.Pages
             set
             {
                 ImageLoaderHelper.IsWaifu2XEnabled = value;
-                BackgroundImgChanger.ChangeBackground(regionBackgroundProp.imgLocalPath, IsCustomBG);
+                if (ImageLoaderHelper.Waifu2XStatus < Waifu2XStatus.Error)
+                    BackgroundImgChanger.ChangeBackground(regionBackgroundProp.imgLocalPath, IsCustomBG);
+                else
+                    Bindings.Update();
             }
         }
 
