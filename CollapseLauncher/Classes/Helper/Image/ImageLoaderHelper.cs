@@ -1,6 +1,7 @@
 ﻿using CollapseLauncher.CustomControls;
 using CollapseLauncher.Dialogs;
 using CollapseLauncher.Extension;
+using CollapseLauncher.Helper.Background;
 using CommunityToolkit.WinUI.Animations;
 using CommunityToolkit.WinUI.Controls;
 using Hi3Helper;
@@ -15,19 +16,24 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Streams;
-using Orientation = Microsoft.UI.Xaml.Controls.Orientation;
 using static CollapseLauncher.Helper.Image.Waifu2X;
 using static Hi3Helper.Shared.Region.LauncherConfig;
+using Orientation = Microsoft.UI.Xaml.Controls.Orientation;
 
 namespace CollapseLauncher.Helper.Image
 {
     internal static class ImageLoaderHelper
     {
         internal static Dictionary<string, string> SupportedImageFormats =
-            new() { { "Supported formats", "*.jpg;*.jpeg;*.jfif;*.png;*.bmp;*.tiff;*.tif;*.webp" } };
+            new() {
+                { "All supported formats", string.Join(';', BackgroundMediaUtility.SupportedImageExt.Select(x => $"*{x}")) + ';' + string.Join(';', BackgroundMediaUtility.SupportedMediaPlayerExt.Select(x => $"*{x}")) },
+                { "Image formats", string.Join(';', BackgroundMediaUtility.SupportedImageExt.Select(x => $"*{x}")) },
+                { "Video formats", string.Join(';', BackgroundMediaUtility.SupportedMediaPlayerExt.Select(x => $"*{x}")) }
+            };
 
         #region Waifu2X
         private static Waifu2X _waifu2X;
@@ -118,7 +124,7 @@ namespace CollapseLauncher.Helper.Image
                 }
 
                 resizedImageFileStream = await GenerateCachedStream(inputFileInfo, targetSourceImageWidth,
-                                                                    targetSourceImageHeight, false);
+                                                                    targetSourceImageHeight);
             }
             catch
             {
@@ -148,7 +154,7 @@ namespace CollapseLauncher.Helper.Image
             };
 
             ImageCropper imageCropper = new ImageCropper();
-            imageCropper.AspectRatio = 113d / 66d;
+            imageCropper.AspectRatio = 16d / 9d;
             imageCropper.CropShape = CropShape.Rectangular;
             imageCropper.ThumbPlacement = ThumbPlacement.Corners;
             imageCropper.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -175,7 +181,7 @@ namespace CollapseLauncher.Helper.Image
             {
                 dialogOverlay.IsPrimaryButtonEnabled = false;
                 dialogOverlay.IsSecondaryButtonEnabled = false;
-                await imageCropper.SaveAsync(cachedFileStream.AsRandomAccessStream()!, BitmapFileFormat.Png, false);
+                await imageCropper.SaveAsync(cachedFileStream.AsRandomAccessStream()!, BitmapFileFormat.Png);
             }
 
             GC.WaitForPendingFinalizers();
@@ -210,8 +216,8 @@ namespace CollapseLauncher.Helper.Image
                 FontWeight = FontWeights.SemiBold
             });
 
-            parentGrid.AddElementToGridRowColumn(imageCropper, 0, 0);
-            parentGrid.AddElementToGridRowColumn(loadingMsgPanel, 0, 0);
+            parentGrid.AddElementToGridRowColumn(imageCropper);
+            parentGrid.AddElementToGridRowColumn(loadingMsgPanel);
 
             StorageFile file = await StorageFile.GetFileFromPathAsync(filePath);
             await imageCropper!.LoadImageFromFile(file!);
@@ -242,8 +248,8 @@ namespace CollapseLauncher.Helper.Image
                 FileInfo newCachedFileInfo = new FileInfo(InputFileName);
 
                 await using (FileStream newCachedFileStream = newCachedFileInfo.Create())
-                    await using (FileStream oldInputFileStream = InputFileInfo.OpenRead())
-                        await ResizeImageStream(oldInputFileStream, newCachedFileStream, ToWidth, ToHeight);
+                await using (FileStream oldInputFileStream = InputFileInfo.OpenRead())
+                    await ResizeImageStream(oldInputFileStream, newCachedFileStream, ToWidth, ToHeight);
 
                 InputFileInfo.Delete();
                 return newCachedFileInfo.OpenRead();
@@ -254,8 +260,8 @@ namespace CollapseLauncher.Helper.Image
             if (isCachedFileExist) return cachedFileInfo.OpenRead();
 
             await using (FileStream cachedFileStream = cachedFileInfo.Create())
-                await using (FileStream inputFileStream = InputFileInfo.OpenRead())
-                    await ResizeImageStream(inputFileStream, cachedFileStream, ToWidth, ToHeight);
+            await using (FileStream inputFileStream = InputFileInfo.OpenRead())
+                await ResizeImageStream(inputFileStream, cachedFileStream, ToWidth, ToHeight);
 
             return cachedFileInfo.OpenRead();
         }
@@ -276,7 +282,8 @@ namespace CollapseLauncher.Helper.Image
                 Width = (int)ToWidth,
                 Height = (int)ToHeight,
                 HybridMode = HybridScaleMode.Off,
-                Interpolation = InterpolationSettings.CubicSmoother
+                Interpolation = InterpolationSettings.CubicSmoother,
+                Anchor = CropAnchor.Bottom | CropAnchor.Center
             };
 
             await Task.Run(() =>
@@ -298,12 +305,12 @@ namespace CollapseLauncher.Helper.Image
             });
         }
 
-        public static async Task<(Bitmap, BitmapImage)> GetResizedBitmapNew(string FilePath)
+        public static async Task<(Bitmap, BitmapImage)> GetResizedBitmapNew(string filePath)
         {
             Bitmap bitmapRet;
             BitmapImage bitmapImageRet;
 
-            FileStream cachedFileStream = await LoadImage(FilePath, false, false);
+            FileStream cachedFileStream = await LoadImage(filePath);
             if (cachedFileStream == null) return (null, null);
             await using (cachedFileStream)
             {

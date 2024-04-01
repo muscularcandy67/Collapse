@@ -13,29 +13,29 @@
     <Page.Resources>
         <ThemeShadow x:Name="SharedShadow"/>
         <Thickness x:Key="NavigationViewBorderThickness">0</Thickness>
+        <Thickness x:Key="NavigationViewContentGridBorderThickness">0</Thickness>
         <ListView x:Name="KeyboardHandler"/>
     </Page.Resources>
     <Grid x:Name="MainPageGrid">
-        <Grid x:Name="Background">
-            <Image x:Name="BackgroundBack"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Opacity="0"
-                   Source="ms-appx:///Assets/Images/PageBackground/default.png"
-                   Stretch="UniformToFill"/>
-            <Image x:Name="BackgroundBackBuffer"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Opacity="0"
-                   Source="ms-appx:///Assets/Images/PageBackground/default.png"
-                   Stretch="UniformToFill"/>
+        <Grid x:Name="BackgroundNewBackGrid"/>
+        <Grid x:Name="BackgroundNewMediaPlayerGrid">
+            <MediaPlayerElement x:Name="MediaPlayerFrame"
+                                Tag="MediaPlayer"
+                                Stretch="UniformToFill"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"/>
         </Grid>
         <Grid x:Name="BackgroundAcrylicMask"
               Background="{ThemeResource BackgroundImageMaskAcrylicBrush}"
-              Visibility="Collapsed"/>
+              Opacity="0"/>
+        <Grid x:Name="BackgroundOverlayTitleBar"
+              Height="64"
+              Background="{ThemeResource BackgroundOverlayTitleBarBrush}"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Top"/>
         <NavigationView x:Name="NavigationViewControl"
                         BackRequested="NavigationViewControl_BackRequested"
-                        Background="{ThemeResource NavigationBarBrush}"
+                        Background="Transparent"
                         IsBackButtonVisible="Visible"
                         IsBackEnabled="{Binding CanGoBack, ElementName=LauncherFrame, Mode=OneWay}"
                         IsPaneOpen="False"
@@ -43,25 +43,12 @@
                         ItemInvoked="NavView_ItemInvoked"
                         Loaded="NavView_Loaded"
                         PaneClosing="NavigationPanelClosing_Event"
-                        PaneDisplayMode="LeftCompact"
                         PaneOpening="NavigationPanelOpening_Event"
+                        PaneDisplayMode="LeftCompact"
                         PaneTitle="{x:Bind helper:Locale.Lang._MainPage.NavigationMenu}"
+                        OpenPaneLength="300"
                         Visibility="Visible">
-            <Grid>
-                <Image x:Name="BackgroundFront"
-                       Margin="0,0,0,0"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Opacity="1"
-                       Source="ms-appx:///Assets/Images/PageBackground/default.png"
-                       Stretch="UniformToFill"/>
-                <Image x:Name="BackgroundFrontBuffer"
-                       Margin="0,0,0,0"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Opacity="0"
-                       Source="ms-appx:///Assets/Images/PageBackground/default.png"
-                       Stretch="UniformToFill"/>
+            <Grid Background="Transparent">
                 <Frame x:Name="LauncherFrame">
                     <Frame.ContentTransitions>
                         <NavigationThemeTransition/>

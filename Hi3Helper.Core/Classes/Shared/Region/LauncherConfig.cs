@@ -86,7 +86,9 @@ namespace Hi3Helper.Shared.Region
         {
             SetAppConfigValue(key, value);
             SaveAppConfig();
+            #if DEBUG
             Logger.LogWriteLine($"SetAndSaveConfigValue::Key[{key}]::Value[{value}]", LogType.Debug);
+            #endif
         }
         public static void SetAppConfigValue(string key, IniValue value) => appIni.Profile![SectionName]![key!] = value;
 
@@ -247,6 +249,7 @@ public static DiscordPresenceManager AppDiscordPresence;
         public static bool IsPreview                        = false;
         public static bool IsAppThemeNeedRestart            = false;
         public static bool IsChangeRegionWarningNeedRestart = false;
+        public static bool IsInstantRegionNeedRestart       = false;
         public static bool IsFirstInstall                   = false;
         public static bool IsConsoleEnabled
         {
@@ -262,6 +265,17 @@ public static DiscordPresenceManager AppDiscordPresence;
         {
             get => GetAppConfigValue("ShowRegionChangeWarning").ToBool();
             set => SetAndSaveConfigValue("ShowRegionChangeWarning", value);
+        }
+
+        private static bool? _cachedIsInstantRegionChange = null;
+        public static bool IsInstantRegionChange
+        {
+            get
+            {
+                _cachedIsInstantRegionChange ??= GetAppConfigValue("UseInstantRegionChange").ToBool();
+                return (bool)_cachedIsInstantRegionChange;
+            }
+            set => SetAndSaveConfigValue("UseInstantRegionChange", value);
         }
 
         public static bool                 ForceInvokeUpdate     = false;
@@ -309,6 +323,9 @@ public static DiscordPresenceManager AppDiscordPresence;
             { "MinimizeToTray", false },
             { "UseExternalBrowser", false },
             { "EnableWaifu2X", false },
+            { "BackgroundAudioVolume", 0.75d },
+            { "BackgroundAudioIsMute", true },
+            { "UseInstantRegionChange", true }
         };
         #endregion
     }

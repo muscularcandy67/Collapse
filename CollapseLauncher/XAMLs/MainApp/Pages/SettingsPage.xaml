@@ -175,9 +175,40 @@
                                        FontSize="12"
                                        FontWeight="Bold"
                                        Foreground="{ThemeResource AccentColor}"
-                                       Text="{x:Bind helper:Locale.Lang._SettingsPage.AppBG_Note}"
                                        TextWrapping="Wrap"
                                        Visibility="Collapsed" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Margin="0,16,0,8"
+                                       Style="{ThemeResource SubtitleTextBlockStyle}"
+                                       Text="{x:Bind helper:Locale.Lang._SettingsPage.VideoBackground}" />
+                            <ToggleSwitch x:Name="VideoBackgroundIsAudioMute"
+                                          Margin="0,4"
+                                          Header="{x:Bind helper:Locale.Lang._SettingsPage.VideoBackground_IsEnableAudio}"
+                                          IsOn="{x:Bind IsVideoBackgroundAudioMute, Mode=TwoWay}"
+                                          OffContent="{x:Bind helper:Locale.Lang._Misc.Disabled}"
+                                          OnContent="{x:Bind helper:Locale.Lang._Misc.Enabled}" />
+                            <TextBlock Margin="0,8,0,8"
+                                       Text="{x:Bind helper:Locale.Lang._SettingsPage.VideoBackground_AudioVolume}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="40" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock HorizontalAlignment="Left"
+                                           VerticalAlignment="Center"
+                                           Style="{ThemeResource SubtitleTextBlockStyle}"
+                                           Text="{Binding Value, ElementName=VideoBackgroundAudioVolumeSlider}"
+                                           TextWrapping="Wrap" />
+                                <Slider x:Name="VideoBackgroundAudioVolumeSlider"
+                                        Grid.Column="1"
+                                        Width="180"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        Maximum="100"
+                                        Minimum="0"
+                                        Value="{x:Bind VideoBackgroundAudioVolume, Mode=TwoWay}" />
+                            </Grid>
                         </StackPanel>
                         <TextBlock Margin="0,16,0,8"
                                    Style="{ThemeResource SubtitleTextBlockStyle}"
@@ -452,6 +483,21 @@
                                    Text="{x:Bind helper:Locale.Lang._SettingsPage.ChangeRegionWarning_Warning}"
                                    TextWrapping="Wrap"
                                    Visibility="Collapsed" />
+                        <StackPanel x:Name="PanelChangeRegionInstant">
+                            <ToggleSwitch x:Name="ToggleChangeRegionInstant"
+                                          Margin="0,4"
+                                          Header="{x:Bind helper:Locale.Lang._SettingsPage.ChangeRegionInstant_Toggle}"
+                                          IsOn="{x:Bind IsInstantRegionChange, Mode=TwoWay}"
+                                          OffContent="{x:Bind helper:Locale.Lang._Misc.Disabled}"
+                                          OnContent="{x:Bind helper:Locale.Lang._Misc.Enabled}" />
+                            <TextBlock x:Name="InstantRegionToggleWarning"
+                                       Margin="0,0,0,8"
+                                       FontWeight="Bold"
+                                       Foreground="{ThemeResource AccentColor}"
+                                       Text="{x:Bind helper:Locale.Lang._SettingsPage.ChangeRegionWarning_Warning}"
+                                       TextWrapping="Wrap"
+                                       Visibility="Collapsed" />
+                        </StackPanel>
                         <ToggleSwitch Margin="0,4"
                                       Header="{x:Bind helper:Locale.Lang._SettingsPage.UseExternalBrowser}"
                                       IsOn="{x:Bind IsAlwaysUseExternalBrowser, Mode=TwoWay}"

@@ -1,7 +1,10 @@
-﻿using Microsoft.UI.Xaml;
+﻿using CollapseLauncher.Helper.Background;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Animation;
 using System;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Threading.Tasks;
 using static CollapseLauncher.InnerLauncherConfig;
 using static CollapseLauncher.Pages.OOBE.OOBESelectGameBGProp;
@@ -58,8 +61,36 @@ namespace CollapseLauncher.Pages.OOBE
                 FadeBackground(1, 0.25);
                 bool IsSuccess = await TryLoadGameDetails(ConfigV2.MetadataV2[_selectedCategory][_selectedRegion]);
 
-                if (_gamePosterBitmap != null && IsSuccess)
-                    MainPage.ApplyAccentColor(this, _gamePosterBitmap, _gamePosterPath);
+                BitmapData bitmapData = null;
+
+                try
+                {
+                    int bitmapChannelCount = _gamePosterBitmap.PixelFormat switch
+                    {
+                        PixelFormat.Format32bppRgb => 4,
+                        PixelFormat.Format32bppArgb => 4,
+                        PixelFormat.Format24bppRgb => 3,
+                        _ => throw new NotSupportedException($"Pixel format of the image: {_gamePosterBitmap.PixelFormat} is unsupported!")
+                    };
+
+                    bitmapData = _gamePosterBitmap.LockBits(new Rectangle(new Point(), _gamePosterBitmap.Size), ImageLockMode.ReadOnly, _gamePosterBitmap.PixelFormat);
+
+                    BitmapInputStruct bitmapInputStruct = new BitmapInputStruct
+                    {
+                        Buffer = bitmapData.Scan0,
+                        Width = bitmapData.Width,
+                        Height = bitmapData.Height,
+                        Channel = bitmapChannelCount
+                    };
+
+                    if (_gamePosterBitmap != null && IsSuccess)
+                        await ColorPaletteUtility.ApplyAccentColor(this, bitmapInputStruct, _gamePosterPath);
+                }
+                finally
+                {
+                    if (bitmapData != null)
+                        _gamePosterBitmap.UnlockBits(bitmapData);
+                }
 
                 NavigationTransitionInfo transition = lastSelectedCategory == _selectedCategory ? new SuppressNavigationTransitionInfo() : new DrillInNavigationTransitionInfo();
 

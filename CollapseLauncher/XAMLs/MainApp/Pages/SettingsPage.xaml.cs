@@ -1,4 +1,6 @@
+using CollapseLauncher.Extension;
 using CollapseLauncher.Helper.Animation;
+using CollapseLauncher.Helper.Background;
 using CollapseLauncher.Helper.Image;
 using CollapseLauncher.Pages.OOBE;
 using Hi3Helper;
@@ -29,7 +31,6 @@ using static Hi3Helper.Logger;
 using static Hi3Helper.Shared.Region.LauncherConfig;
 using TaskSched = Microsoft.Win32.TaskScheduler.Task;
 using Task = System.Threading.Tasks.Task;
-using CollapseLauncher.Extension;
 
 // ReSharper disable PossibleNullReferenceException
 // ReSharper disable AssignNullToNotNullAttribute
@@ -42,14 +43,19 @@ namespace CollapseLauncher.Pages
         #region Properties
 
         private const string _collapseStartupTaskName = "CollapseLauncherStartupTask";
-        private const string RepoUrl = "https://github.com/CollapseLauncher/Collapse/commit/";
-
+        private const string RepoUrl                  = "https://github.com/CollapseLauncher/Collapse/commit/";
+        
+        private readonly bool _initIsInstantRegionChange;
+        private readonly bool _initIsShowRegionChangeWarning;
         #endregion
 
         #region Settings Page Handler
         public SettingsPage()
         {
-            this.InitializeComponent();
+            _initIsInstantRegionChange     = LauncherConfig.IsInstantRegionChange;
+            _initIsShowRegionChangeWarning = LauncherConfig.IsShowRegionChangeWarning;
+                
+            InitializeComponent();
             this.EnableImplicitAnimation(true);
             AboutApp.FindAndSetTextBlockWrapping(TextWrapping.Wrap, HorizontalAlignment.Center, TextAlignment.Center, true);
 
@@ -80,12 +86,20 @@ namespace CollapseLauncher.Pages
             if (IsChangeRegionWarningNeedRestart)
                 ChangeRegionToggleWarning.Visibility = Visibility.Visible;
 
+            if (IsInstantRegionNeedRestart)
+                InstantRegionToggleWarning.Visibility = Visibility.Visible;
+
             string SwitchToVer = IsPreview ? "Stable" : "Preview";
             ChangeReleaseBtnText.Text = string.Format(Lang._SettingsPage.AppChangeReleaseChannel, SwitchToVer);
 #if DISABLEDISCORD
             ToggleDiscordRPC.Visibility = Visibility.Collapsed;
 #endif
 
+            AppBGCustomizerNote.Text = String.Format(Lang._SettingsPage.AppBG_Note,
+                string.Join("; ", BackgroundMediaUtility.SupportedImageExt),
+                string.Join("; ", BackgroundMediaUtility.SupportedMediaPlayerExt)
+            );
+            
             UpdateBindingsInvoker.UpdateEvents += UpdateBindingsEvents;
         }
 
@@ -355,15 +369,10 @@ namespace CollapseLauncher.Pages
             string file = await GetFilePicker(ImageLoaderHelper.SupportedImageFormats);
             if (!string.IsNullOrEmpty(file))
             {
-                FileStream dummyStream = await ImageLoaderHelper.LoadImage(file, true, true);
-                if (dummyStream != null)
-                {
-                    await dummyStream.DisposeAsync();
-                    regionBackgroundProp.imgLocalPath = file;
-                    SetAndSaveConfigValue("CustomBGPath", file);
-                    BGPathDisplay.Text = file;
-                    BackgroundImgChanger.ChangeBackground(file);
-                }
+                regionBackgroundProp.imgLocalPath = file;
+                SetAndSaveConfigValue("CustomBGPath", file);
+                BGPathDisplay.Text = file;
+                BackgroundImgChanger.ChangeBackground(file, true, true, true);
             }
         }
 
@@ -456,7 +465,7 @@ namespace CollapseLauncher.Pages
                         }
                     }
                     BGPathDisplay.Text = regionBackgroundProp.imgLocalPath;
-                    BackgroundImgChanger.ChangeBackground(regionBackgroundProp.imgLocalPath);
+                    BackgroundImgChanger.ChangeBackground(regionBackgroundProp.imgLocalPath, true, true, false);
                     AppBGCustomizer.Visibility = Visibility.Visible;
                     AppBGCustomizerNote.Visibility = Visibility.Visible;
                 }
@@ -540,6 +549,38 @@ namespace CollapseLauncher.Pages
             }
         }
 
+        private bool IsVideoBackgroundAudioMute
+        {
+            get => !GetAppConfigValue("BackgroundAudioIsMute").ToBool();
+            set
+            {
+                if (!value)
+                    BackgroundMediaUtility.Mute();
+                else
+                    BackgroundMediaUtility.Unmute();
+            }
+        }
+
+        private double VideoBackgroundAudioVolume
+        {
+            get
+            {
+                double value = GetAppConfigValue("BackgroundAudioVolume").ToDouble();
+                if (value < 0)
+                    BackgroundMediaUtility.SetVolume(0d);
+                if (value > 1)
+                    BackgroundMediaUtility.SetVolume(1d);
+
+                return value * 100d;
+            }
+            set
+            {
+                if (value < 0) return;
+                double downValue = value / 100d;
+                BackgroundMediaUtility.SetVolume(downValue);
+            }
+        }
+
         private bool IsDiscordGameStatusEnabled
         {
             get => GetAppConfigValue("EnableDiscordGameStatus").ToBool();
@@ -580,7 +621,8 @@ namespace CollapseLauncher.Pages
             set
             {
                 SetAndSaveConfigValue("EnableAcrylicEffect", value);
-                App.ToggleBlurBackdrop(value);
+                if (BackgroundMediaUtility.CurrentAppliedMediaType == BackgroundMediaUtility.MediaType.StillImage)
+                    App.ToggleBlurBackdrop(value);
             }
         }
 
@@ -601,7 +643,7 @@ namespace CollapseLauncher.Pages
         {
             get
             {
-                var tooltip = Lang._SettingsPage.Waifu2X_Help;
+                var tooltip = $"{Lang._SettingsPage.Waifu2X_Help}\r\n{Lang._SettingsPage.Waifu2X_Help2}";
                 switch (ImageLoaderHelper.Waifu2XStatus)
                 {
                     case Waifu2XStatus.CpuMode:
@@ -706,6 +748,11 @@ namespace CollapseLauncher.Pages
 
             string SwitchToVer = IsPreview ? "Stable" : "Preview";
             ChangeReleaseBtnText.Text = string.Format(Lang._SettingsPage.AppChangeReleaseChannel, SwitchToVer);
+            
+            AppBGCustomizerNote.Text = String.Format(Lang._SettingsPage.AppBG_Note,
+                string.Join("; ", BackgroundMediaUtility.SupportedImageExt),
+                string.Join("; ", BackgroundMediaUtility.SupportedMediaPlayerExt)
+            );
         }
 
         private List<string> WindowSizeProfilesKey = WindowSizeProfiles.Keys.ToList();
@@ -749,16 +796,36 @@ namespace CollapseLauncher.Pages
 
         private bool IsShowRegionChangeWarning
         {
-            get => LauncherConfig.IsShowRegionChangeWarning;
+            get
+            { 
+                var value = LauncherConfig.IsShowRegionChangeWarning;
+
+                PanelChangeRegionInstant.Visibility = !value ? Visibility.Visible : Visibility.Collapsed;
+                return value;
+            }
             set
             {
-                IsChangeRegionWarningNeedRestart = true;
-                ChangeRegionToggleWarning.Visibility = Visibility.Visible;
-
                 LauncherConfig.IsShowRegionChangeWarning = value;
+                IsChangeRegionWarningNeedRestart         = true;
+                
+                var valueConfig = _initIsShowRegionChangeWarning;
+                ChangeRegionToggleWarning.Visibility = value != valueConfig ? Visibility.Visible : Visibility.Collapsed;
+                PanelChangeRegionInstant.Visibility  = !value ? Visibility.Visible : Visibility.Collapsed;
             }
         }
-
+        
+        private bool IsInstantRegionChange
+        {
+            get => LauncherConfig.IsInstantRegionChange;
+            set
+            {
+                IsInstantRegionNeedRestart = true;
+                var valueConfig = _initIsInstantRegionChange;
+                InstantRegionToggleWarning.Visibility = value != valueConfig ? Visibility.Visible : Visibility.Collapsed;
+                
+                LauncherConfig.IsInstantRegionChange = value;
+            }
+        }
         private bool IsUseDownloadChunksMerging
         {
             get => GetAppConfigValue("UseDownloadChunksMerging").ToBool();

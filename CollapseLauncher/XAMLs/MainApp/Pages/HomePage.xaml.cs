@@ -46,6 +46,7 @@ using FontFamily = Microsoft.UI.Xaml.Media.FontFamily;
 using Image = Microsoft.UI.Xaml.Controls.Image;
 using Orientation = Microsoft.UI.Xaml.Controls.Orientation;
 using Hi3Helper.EncTool.WindowTool;
+using CollapseLauncher.Extension;
 
 namespace CollapseLauncher.Pages
 {
@@ -111,7 +112,8 @@ namespace CollapseLauncher.Pages
         }
 
         private bool IsPageUnload { get; set; }
-        private bool NeedShowEventIcon = true;
+
+        private bool NeedShowEventIcon => GetAppConfigValue("ShowSocialMediaPanel").ToBool();
 
         private void ReturnToHomePage()
         {
@@ -451,7 +453,7 @@ namespace CollapseLauncher.Pages
         #region Event Image
         private async void HideImageEventImg(bool hide)
         {
-            if (!NeedShowEventIcon) return;
+            //if (!NeedShowEventIcon) return;
 
             if (!hide)
                 ImageEventImgGrid.Visibility = Visibility.Visible;
@@ -765,7 +767,7 @@ namespace CollapseLauncher.Pages
                         CustomStartupArgs.Visibility = Visibility.Visible;
                         InstallGameBtn.Visibility = Visibility.Collapsed;
                         StartGameBtn.Visibility = Visibility.Visible;
-                        NeedShowEventIcon = false;
+                        //NeedShowEventIcon = false;
                         SpawnPreloadBox();
                     }
                     break;
@@ -825,7 +827,7 @@ namespace CollapseLauncher.Pages
 
         private async void CheckRunningGameInstance(CancellationToken Token)
         {
-            FontFamily FF = Application.Current.Resources["FontAwesomeSolid"] as FontFamily;
+            FontFamily FF = FontCollections.FontAwesomeSolid;
             VerticalAlignment TVAlign = VerticalAlignment.Center;
             Orientation SOrient = Orientation.Horizontal;
             Thickness Margin = new Thickness(0, -2, 8, 0);
@@ -833,13 +835,13 @@ namespace CollapseLauncher.Pages
             FontWeight FW = FontWeights.Medium;
             string Gl = "";
 
-            StackPanel BtnStartGame = new StackPanel() { Orientation = SOrient, Margin = SMargin };
-            BtnStartGame.Children.Add(new TextBlock() { FontWeight = FW, Margin = Margin, VerticalAlignment = TVAlign, Text = Lang._HomePage.StartBtn });
-            BtnStartGame.Children.Add(new TextBlock() { FontFamily = FF, Text = Gl, FontSize = 18 });
+            StackPanel BtnStartGame = UIElementExtensions.CreateStackPanel(SOrient).WithMargin(SMargin);
+            BtnStartGame.AddElementToStackPanel(new TextBlock() { FontWeight = FW, Text = Lang._HomePage.StartBtn }.WithVerticalAlignment(TVAlign).WithMargin(Margin),
+                                                new TextBlock() { FontFamily = FF, Text = Gl, FontSize = 18 });
 
-            StackPanel BtnRunningGame = new StackPanel() { Orientation = SOrient, Margin = SMargin };
-            BtnRunningGame.Children.Add(new TextBlock() { FontWeight = FW, Margin = Margin, VerticalAlignment = TVAlign, Text = Lang._HomePage.StartBtnRunning });
-            BtnRunningGame.Children.Add(new TextBlock() { FontFamily = FF, Text = Gl, FontSize = 18 });
+            StackPanel BtnRunningGame = UIElementExtensions.CreateStackPanel(SOrient).WithMargin(SMargin);
+            BtnRunningGame.AddElementToStackPanel(new TextBlock() { FontWeight = FW, Text = Lang._HomePage.StartBtnRunning }.WithVerticalAlignment(TVAlign).WithMargin(Margin),
+                                                  new TextBlock() { FontFamily = FF, Text = Gl, FontSize = 18 });
 
             try
             {
@@ -960,26 +962,12 @@ namespace CollapseLauncher.Pages
                     PreloadDialogBox.Title = Lang._HomePage.PreloadNotifCompleteTitle;
                     PreloadDialogBox.Message = string.Format(Lang._HomePage.PreloadNotifCompleteSubtitle, ver);
                     PreloadDialogBox.IsClosable = true;
-
-                    StackPanel Text = new StackPanel { Orientation = Orientation.Horizontal };
-                    Text.Children.Add(
-                        new FontIcon
-                        {
-                            Glyph = "",
-                            FontFamily = (FontFamily)Application.Current.Resources["FontAwesomeSolid"],
-                            FontSize = 16
-                        });
-
-                    Text.Children.Add(
-                        new TextBlock
-                        {
-                            Text = Lang._HomePage.PreloadNotifIntegrityCheckBtn,
-                            FontWeight = FontWeights.Medium,
-                            Margin = new Thickness(8, 0, 0, 0),
-                            VerticalAlignment = VerticalAlignment.Center
-                        });
-
-                    DownloadPreBtn.Content = Text;
+                    DownloadPreBtn.Content = UIElementExtensions.CreateIconTextGrid(
+                        text: Lang._HomePage.PreloadNotifIntegrityCheckBtn,
+                        iconGlyph: "",
+                        iconFontFamily: "FontAwesomeSolid",
+                        textWeight: FontWeights.Medium
+                    );
                 }
                 PreloadDialogBox.IsOpen = true;
             }
@@ -1296,6 +1284,9 @@ namespace CollapseLauncher.Pages
                 proc.StartInfo.Verb             = "runas";
                 proc.Start();
 
+				// Stop update check
+				IsSkippingUpdateCheck = true;
+				
                 // Start the resizable window payload (also use the same token as PlaytimeToken)
                 StartResizableWindowPayload(
                     _gamePreset.GameExecutableName,
@@ -1334,6 +1325,7 @@ namespace CollapseLauncher.Pages
             {
                 LogWriteLine($"There is a problem while trying to launch Game with Region: {_gamePreset.ZoneName}\r\nTraceback: {ex}", LogType.Error, true);
                 ErrorSender.SendException(new System.ComponentModel.Win32Exception($"There was an error while trying to launch the game!\r\tThrow: {ex}", ex));
+				IsSkippingUpdateCheck = false;
             }
         }
 
@@ -1385,6 +1377,9 @@ namespace CollapseLauncher.Pages
 
             // Run Post Launch Command
             if (_settings.SettingsCollapseMisc.UseAdvancedGameSettings && _settings.SettingsCollapseMisc.UseGamePostExitCommand) PostExitCommand(_settings);
+			
+			// Re-enable update check
+			IsSkippingUpdateCheck = false;
         }
 
         private void StopGame(PresetConfigV2 gamePreset)
@@ -2027,7 +2022,7 @@ namespace CollapseLauncher.Pages
             else if (sender is TextBlock block)
                 textBlock = block;
             if (textBlock != null)
-                textBlock.Foreground = (Brush)Application.Current.Resources["AccentColor"];
+                textBlock.Foreground = UIElementExtensions.GetApplicationResource<Brush>("AccentColor");
         }
 
         private void HyperLink_OnPointerExited(object sender, PointerRoutedEventArgs e)
@@ -2046,7 +2041,7 @@ namespace CollapseLauncher.Pages
             else if (sender is TextBlock block)
                 textBlock = block;
             if (textBlock != null)
-                textBlock.Foreground = (Brush)Application.Current.Resources["TextFillColorPrimaryBrush"];
+                textBlock.Foreground = UIElementExtensions.GetApplicationResource<Brush>("TextFillColorPrimaryBrush");
         }
         #endregion
 

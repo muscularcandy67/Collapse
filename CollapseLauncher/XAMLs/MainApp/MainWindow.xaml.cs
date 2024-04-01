@@ -1,4 +1,6 @@
+using CollapseLauncher.Extension;
 using CollapseLauncher.Helper.Animation;
+using CollapseLauncher.Helper.Background;
 using CollapseLauncher.Helper.Image;
 using CollapseLauncher.Helper.Loading;
 using Microsoft.UI;
@@ -77,7 +79,7 @@ namespace CollapseLauncher
 
                 AnimationHelper.EnableImplicitAnimation(TitleBarFrameGrid, true);
                 AnimationHelper.EnableImplicitAnimation(BottomFrameGrid, true);
-                AnimationHelper.EnableImplicitAnimation(MainWindowGridContainer, true);
+                AnimationHelper.EnableImplicitAnimation(LoadingStatusGrid, true);
             }
             catch (Exception ex)
             {
@@ -229,8 +231,18 @@ namespace CollapseLauncher
         {
             const uint WM_SYSCOMMAND = 0x0112;
             const uint WM_SHOWWINDOW = 0x0018;
+            const uint WM_ACTIVATEAPP = 0x001C;
+
             switch (msg)
             {
+                case WM_ACTIVATEAPP:
+                    {
+                        if (wParam == 1)
+                            BackgroundMediaUtility.WindowFocused();
+                        else
+                            BackgroundMediaUtility.WindowUnfocused();
+                    }
+                    break;
                 case WM_SYSCOMMAND:
                     {
                         const uint SC_MAXIMIZE = 0xF030;
@@ -254,6 +266,7 @@ namespace CollapseLauncher
                                 }
                             case SC_MINIMIZE:
                                 {
+                                    BackgroundMediaUtility.WindowUnfocused();
                                     if (GetAppConfigValue("MinimizeToTray").ToBool())
                                     {
                                         // Carousel is handled inside WM_SHOWWINDOW message for minimize to tray
@@ -266,6 +279,7 @@ namespace CollapseLauncher
                                 }
                             case SC_RESTORE:
                                 {
+                                    BackgroundMediaUtility.WindowFocused();
                                     m_homePage?.CarouselRestartScroll();
                                     break;
                                 }
@@ -277,7 +291,10 @@ namespace CollapseLauncher
                         if (wParam == 0)
                             m_homePage?.CarouselStopScroll();
                         else
+                        {
+                            BackgroundMediaUtility.WindowFocused();
                             m_homePage?.CarouselRestartScroll();
+                        }
                         break;
                     }
             }
@@ -286,9 +303,9 @@ namespace CollapseLauncher
 
         internal static void SetLegacyTitleBarColor()
         {
-            Application.Current.Resources["WindowCaptionForeground"] = IsAppThemeLight ? new Windows.UI.Color { A = 255, B = 0, G = 0, R = 0 } : new Windows.UI.Color { A = 255, B = 255, G = 255, R = 255 };
-            Application.Current.Resources["WindowCaptionBackground"] = new SolidColorBrush(new Windows.UI.Color { A = 0, B = 0, G = 0, R = 0 });
-            Application.Current.Resources["WindowCaptionBackgroundDisabled"] = new SolidColorBrush(new Windows.UI.Color { A = 0, B = 0, G = 0, R = 0 });
+            UIElementExtensions.SetApplicationResource("WindowCaptionForeground", IsAppThemeLight ? new Windows.UI.Color { A = 255, B = 0, G = 0, R = 0 } : new Windows.UI.Color { A = 255, B = 255, G = 255, R = 255 });
+            UIElementExtensions.SetApplicationResource("WindowCaptionBackground", new SolidColorBrush(new Windows.UI.Color { A = 0, B = 0, G = 0, R = 0 }));
+            UIElementExtensions.SetApplicationResource("WindowCaptionBackgroundDisabled", new SolidColorBrush(new Windows.UI.Color { A = 0, B = 0, G = 0, R = 0 }));
         }
 
         private void LauncherUpdateInvoker_UpdateEvent(object sender, LauncherUpdateProperty e)
@@ -314,7 +331,7 @@ namespace CollapseLauncher
         private int _lastWindowHeight;
         private WindowRect _windowPosAndSize = new WindowRect();
 
-        public void SetWindowSize(IntPtr hwnd, int width = 1028, int height = 634)
+        public void SetWindowSize(IntPtr hwnd, int width = 1024, int height = 576)
         {
             if (hwnd == IntPtr.Zero) hwnd = m_windowHandle;
 
@@ -327,16 +344,26 @@ namespace CollapseLauncher
             int xOff = (desktopSize.Width - _lastWindowWidth) / 2;
             int yOff = (desktopSize.Height - _lastWindowHeight) / 2;
 
+            // We have no title bar
+            const int SM_CYCAPTION      = 4;
+            const int SM_CYSIZEFRAME    = 33;
+            const int SM_CXPADDEDBORDER = 92;
+            var titleBarHeight = GetSystemMetrics(SM_CYSIZEFRAME) + GetSystemMetrics(SM_CYCAPTION) +
+                                 GetSystemMetrics(SM_CXPADDEDBORDER);
+
             // Old Interop ver. Call
             // SetWindowPos(hwnd, (IntPtr)SpecialWindowHandles.HWND_TOP,
             //                             xOff, yOff, width, height,
             //                             SetWindowPosFlags.SWP_SHOWWINDOW);
 
-            // New m_appWindow built-in Move and Resize
-            m_appWindow.MoveAndResize(new RectInt32
+            // New m_appWindow built-in Move and ResizeClient
+            m_appWindow.ResizeClient(new SizeInt32
             {
                 Width = _lastWindowWidth,
-                Height = _lastWindowHeight,
+                Height = _lastWindowHeight - titleBarHeight
+            });
+            m_appWindow.Move(new PointInt32
+            {
                 X = xOff,
                 Y = yOff
             });
