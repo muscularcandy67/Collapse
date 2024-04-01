@@ -53,36 +53,6 @@ namespace CollapseLauncher.GameSettings.Honkai.Enums
     internal enum SelectWeatherQuality { Low, Middle, High }
     
     /// <summary>
-    /// This selection has 5 name types: Off (0), Low (1), Middle (2), High (3), Ultra (4)<br/>
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<SelectLightningQuality>))]
-    internal enum SelectLightningQuality { Off, Low, Middle, High, Ultra }
-    
-    /// <summary>
-    /// This selection has 4 name types: Off, Low, Middle, High
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<SelectPostFXQuality>))]
-    internal enum SelectPostFXQuality { Off, Low, Middle, High }
-    
-    /// <summary>
-    /// This selection has 3 name types: Off, FXAA, TAA
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<SelectAAType>))]
-    internal enum SelectAAType { Off, FXAA, TAA }
-    
-    /// <summary>
-    /// This selection has 3 name tupes: Low, Middle, High
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<SelectCharacterQuality>))]
-    internal enum SelectCharacterQuality { Low, Middle, High }
-    
-    /// <summary>
-    /// This selection has 3 name tupes: Low, Middle, High
-    /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter<SelectWeatherQuality>))]
-    internal enum SelectWeatherQuality { Low, Middle, High }
-    
-    /// <summary>
     /// This selection has 2 name types: Low (0), High (1)<br/>
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter<SelectGlobalIllumination>))]
