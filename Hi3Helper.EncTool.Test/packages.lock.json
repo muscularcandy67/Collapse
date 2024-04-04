@@ -1,7 +1,7 @@
 {
   "version": 1,
   "dependencies": {
-    "net8.0": {
+    "net9.0": {
       "Google.Protobuf": {
         "type": "Transitive",
         "resolved": "3.26.0",
