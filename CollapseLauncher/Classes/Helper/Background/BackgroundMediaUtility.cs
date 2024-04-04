@@ -44,7 +44,9 @@ namespace CollapseLauncher.Helper.Background
         private static Grid? _bgOverlayTitleBar;
 
         private static Grid? _parentBgImageBackgroundGrid;
+    #pragma warning disable CS0169 // Field is never used
         private static Grid? _parentBgImageForegroundGrid;
+    #pragma warning restore CS0169 // Field is never used
         private static Grid? _parentBgMediaPlayerBackgroundGrid;
 
         internal static MediaType CurrentAppliedMediaType = MediaType.Unknown;
@@ -57,6 +59,8 @@ namespace CollapseLauncher.Helper.Background
         private static bool _isCurrentDimmAnimRun;
         private static bool _isCurrentUndimmAnimRun;
         private static bool _isCurrentRegistered;
+
+        private static FileStream? _alternativeFileStream;
 
         private delegate ValueTask AssignDefaultAction<in T>(T element) where T : class;
 
@@ -262,7 +266,7 @@ namespace CollapseLauncher.Helper.Background
         /// <param name="isForceRecreateCache">Request a cache recreation if the background file properties have been cached</param>
         /// <exception cref="FormatException">Throws if the background file is not supported</exception>
         /// <exception cref="NullReferenceException">Throws if some instances aren't yet initialized</exception>
-        internal static async Task LoadBackground(string mediaPath, bool isRequestInit = false,
+        internal static async Task LoadBackground(string mediaPath, bool isRequestInit = false, 
             bool isForceRecreateCache = false)
         {
             while (!_isCurrentRegistered)
@@ -355,7 +359,8 @@ namespace CollapseLauncher.Helper.Background
                 IBackgroundMediaLoader? loader = GetImageLoader(CurrentAppliedMediaType);
                 if (loader == null) return;
                 await loader.DimmAsync(_cancellationToken?.Token ?? default);
-            }
+            } 
+            catch { }
             finally
             {
                 _isCurrentDimmAnimRun = false;
@@ -379,6 +384,7 @@ namespace CollapseLauncher.Helper.Background
                 if (loader == null) return;
                 await loader.UndimmAsync(_cancellationToken?.Token ?? default);
             }
+            catch { }
             finally
             {
                 _isCurrentUndimmAnimRun = false;
@@ -441,6 +447,18 @@ namespace CollapseLauncher.Helper.Background
             _currentMediaLoader?.Pause();
         }
 
+        public static FileStream? GetAlternativeFileStream()
+        {
+            FileStream? returnStream = _alternativeFileStream;
+            _alternativeFileStream = null;
+            return returnStream;
+        }
+
+        public static void SetAlternativeFileStream(FileStream stream)
+        {
+            _alternativeFileStream = stream;
+        }
+
         private static IBackgroundMediaLoader? GetImageLoader(MediaType mediaType)
         {
             return mediaType switch
@@ -452,7 +470,7 @@ namespace CollapseLauncher.Helper.Background
             };
         }
 
-        private static MediaType GetMediaType(string mediaPath)
+        public static MediaType GetMediaType(string mediaPath)
         {
             string extension = Path.GetExtension(mediaPath);
             if (SupportedImageExt.Contains(extension, StringComparer.InvariantCultureIgnoreCase))

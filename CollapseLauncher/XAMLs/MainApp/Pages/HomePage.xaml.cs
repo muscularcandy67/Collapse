@@ -1,17 +1,16 @@
 using CollapseLauncher.CustomControls;
 using CollapseLauncher.Dialogs;
+#if !DISABLEDISCORD
+using CollapseLauncher.DiscordPresence;
+#endif
 using CollapseLauncher.FileDialogCOM;
 using CollapseLauncher.Helper.Image;
 using CollapseLauncher.Interfaces;
 using CollapseLauncher.Statics;
 using CollapseLauncher.ShortcutUtils;
 using Hi3Helper;
-using Hi3Helper.Preset;
 using Hi3Helper.Screen;
 using Hi3Helper.Shared.ClassStruct;
-#if !DISABLEDISCORD
-using Hi3Helper.DiscordPresence;
-#endif
 using Microsoft.UI.Input;
 using Microsoft.UI.Text;
 using Microsoft.UI.Xaml;
@@ -47,6 +46,7 @@ using Image = Microsoft.UI.Xaml.Controls.Image;
 using Orientation = Microsoft.UI.Xaml.Controls.Orientation;
 using Hi3Helper.EncTool.WindowTool;
 using CollapseLauncher.Extension;
+using CollapseLauncher.Helper.Metadata;
 
 namespace CollapseLauncher.Pages
 {
@@ -258,24 +258,24 @@ namespace CollapseLauncher.Pages
             if (!isCacheIconExist)
             {
                 using (Stream cachedIconFileStream = cachedIconFileInfo.Create())
-                using (Stream copyIconFileStream = new MemoryStream())
-                await using (Stream iconFileStream = await FallbackCDNUtil.GetHttpStreamFromResponse(regionNewsProp.eventPanel.icon, PageToken.Token))
-                {
-                    // Copy remote stream to memory stream
-                    await iconFileStream.CopyToAsync(copyIconFileStream);
-                    copyIconFileStream.Position = 0;
-                    // Get the icon image information and set the resized frame size
-                    ImageFileInfo iconImageInfo = await Task.Run(() => ImageFileInfo.Load(copyIconFileStream));
-                    int width = (int)(iconImageInfo.Frames[0].Width * m_appDPIScale);
-                    int height = (int)(iconImageInfo.Frames[0].Height * m_appDPIScale);
+                    using (Stream copyIconFileStream = new MemoryStream())
+                        await using (Stream iconFileStream = await FallbackCDNUtil.GetHttpStreamFromResponse(regionNewsProp.eventPanel.icon, PageToken.Token))
+                        {
+                            // Copy remote stream to memory stream
+                            await iconFileStream.CopyToAsync(copyIconFileStream);
+                            copyIconFileStream.Position = 0;
+                            // Get the icon image information and set the resized frame size
+                            ImageFileInfo iconImageInfo = await Task.Run(() => ImageFileInfo.Load(copyIconFileStream));
+                            int width = (int)(iconImageInfo.Frames[0].Width * m_appDPIScale);
+                            int height = (int)(iconImageInfo.Frames[0].Height * m_appDPIScale);
 
-                    copyIconFileStream.Position = 0; // Reset the original icon stream position
-                    await ImageLoaderHelper.ResizeImageStream(copyIconFileStream, cachedIconFileStream, (uint)width, (uint)height); // Start resizing
-                    cachedIconFileStream.Position = 0; // Reset the cached icon stream position
+                            copyIconFileStream.Position = 0; // Reset the original icon stream position
+                            await ImageLoaderHelper.ResizeImageStream(copyIconFileStream, cachedIconFileStream, (uint)width, (uint)height); // Start resizing
+                            cachedIconFileStream.Position = 0; // Reset the cached icon stream position
 
-                    // Set the source from cached icon stream
-                    source.SetSource(cachedIconFileStream.AsRandomAccessStream());
-                }
+                            // Set the source from cached icon stream
+                            source.SetSource(cachedIconFileStream.AsRandomAccessStream());
+                        }
             }
             else
             {
@@ -714,7 +714,7 @@ namespace CollapseLauncher.Pages
         {
             Visibility RepairGameButtonVisible = (CurrentGameProperty._GameVersion.GamePreset.IsRepairEnabled ?? false) ? Visibility.Visible : Visibility.Collapsed;
 
-            if ((!(CurrentGameProperty._GameVersion.GamePreset.IsConvertible ?? false)) || (CurrentGameProperty._GameVersion.GameType != GameType.Honkai))
+            if ((!(CurrentGameProperty._GameVersion.GamePreset.IsConvertible ?? false)) || (CurrentGameProperty._GameVersion.GameType != GameNameType.Honkai))
                 ConvertVersionButton.Visibility = Visibility.Collapsed;
 
             // Clear the _CommunityToolsProperty statics
@@ -748,7 +748,7 @@ namespace CollapseLauncher.Pages
                 }
             }
 
-            if (CurrentGameProperty._GameVersion.GameType == GameType.Genshin) OpenCacheFolderButton.Visibility = Visibility.Collapsed;
+            if (CurrentGameProperty._GameVersion.GameType == GameNameType.Genshin) OpenCacheFolderButton.Visibility = Visibility.Collapsed;
 
             GameInstallationState = CurrentGameProperty._GameVersion.GetGameState();
             switch (GameInstallationState)
@@ -1245,9 +1245,9 @@ namespace CollapseLauncher.Pages
         {
             // Initialize values
             IGameSettingsUniversal _Settings   = CurrentGameProperty!._GameSettings!.AsIGameSettingsUniversal();
-            PresetConfigV2         _gamePreset = CurrentGameProperty!._GameVersion!.GamePreset!;
+            PresetConfig         _gamePreset = CurrentGameProperty!._GameVersion!.GamePreset!;
 
-            var isGenshin  = CurrentGameProperty!._GameVersion.GameType == GameType.Genshin;
+            var isGenshin  = CurrentGameProperty!._GameVersion.GameType == GameNameType.Genshin;
             var giForceHDR = false;
             
             try
@@ -1382,7 +1382,7 @@ namespace CollapseLauncher.Pages
 			IsSkippingUpdateCheck = false;
         }
 
-        private void StopGame(PresetConfigV2 gamePreset)
+        private void StopGame(PresetConfig gamePreset)
         {
             ArgumentNullException.ThrowIfNull(gamePreset);
             try
@@ -1402,7 +1402,7 @@ namespace CollapseLauncher.Pages
         #endregion
 
         #region Game Resizable Window Payload
-        internal async void StartResizableWindowPayload(string executableName, IGameSettingsUniversal settings, GameType gameType)
+        internal async void StartResizableWindowPayload(string executableName, IGameSettingsUniversal settings, GameNameType gameType)
         {
             try
             {
@@ -1417,7 +1417,7 @@ namespace CollapseLauncher.Pages
                 // This is required for Honkai: Star Rail since the game will reset its pos + size. Making
                 // it impossible to use custom resolution (but since you are using Collapse, it's now
                 // possible :teriStare:)
-                bool isNeedToResetPos = gameType == GameType.StarRail;
+                bool isNeedToResetPos = gameType == GameNameType.StarRail;
                 await resizableWindowHook.StartHook(executableName, ResizableWindowHookToken.Token, isNeedToResetPos);
             }
             catch (Exception ex)
@@ -1434,7 +1434,7 @@ namespace CollapseLauncher.Pages
         {
             StringBuilder parameter = new StringBuilder();
 
-            if (CurrentGameProperty._GameVersion.GameType == GameType.Honkai)
+            if (CurrentGameProperty._GameVersion.GameType == GameNameType.Honkai)
             {
                 if (_Settings.SettingsCollapseScreen.UseExclusiveFullscreen)
                 {
@@ -1477,7 +1477,7 @@ namespace CollapseLauncher.Pages
                         break;
                 }
             }
-            if (CurrentGameProperty._GameVersion.GameType == GameType.StarRail)
+            if (CurrentGameProperty._GameVersion.GameType == GameNameType.StarRail)
             {
                 if (_Settings.SettingsCollapseScreen.UseExclusiveFullscreen)
                 {
@@ -1500,7 +1500,7 @@ namespace CollapseLauncher.Pages
                 else
                     parameter.AppendFormat("-screen-width {0} -screen-height {1} ", screenSize.Width, screenSize.Height);
             }
-            if (CurrentGameProperty._GameVersion.GameType == GameType.Genshin)
+            if (CurrentGameProperty._GameVersion.GameType == GameNameType.Genshin)
             {
                 if (_Settings.SettingsCollapseScreen.UseExclusiveFullscreen)
                 {
@@ -1556,7 +1556,7 @@ namespace CollapseLauncher.Pages
         #region Media Pack
         public async Task<bool> CheckMediaPackInstalled()
         {
-            if (CurrentGameProperty._GameVersion.GameType != GameType.Honkai) return true;
+            if (CurrentGameProperty._GameVersion.GameType != GameNameType.Honkai) return true;
 
             RegistryKey reg = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\Setup\WindowsFeatures\WindowsMediaVersion");
             if (reg != null)
@@ -1634,24 +1634,24 @@ namespace CollapseLauncher.Pages
                     Directory.CreateDirectory(Path.GetDirectoryName(logPath));
 
                 using (FileStream fs = new FileStream(logPath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
-                using (StreamReader reader = new StreamReader(fs))
-                {
-                    while (true)
+                    using (StreamReader reader = new StreamReader(fs))
                     {
-                        while (!reader.EndOfStream)
+                        while (true)
                         {
-                            string line;
-                            line = await reader.ReadLineAsync(WatchOutputLog.Token);
-                            if (RequireWindowExclusivePayload && line == "MoleMole.MonoGameEntry:Awake()")
+                            while (!reader.EndOfStream)
                             {
-                                StartExclusiveWindowPayload();
-                                RequireWindowExclusivePayload = false;
+                                string line;
+                                line = await reader.ReadLineAsync(WatchOutputLog.Token);
+                                if (RequireWindowExclusivePayload && line == "MoleMole.MonoGameEntry:Awake()")
+                                {
+                                    StartExclusiveWindowPayload();
+                                    RequireWindowExclusivePayload = false;
+                                }
+                                LogWriteLine(line, LogType.Game, GetAppConfigValue("IncludeGameLogs").ToBool());
                             }
-                            LogWriteLine(line, LogType.Game, GetAppConfigValue("IncludeGameLogs").ToBool());
+                            await Task.Delay(100, WatchOutputLog.Token);
                         }
-                        await Task.Delay(100, WatchOutputLog.Token);
                     }
-                }
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)
@@ -1696,7 +1696,7 @@ namespace CollapseLauncher.Pages
         {
             string ScreenshotFolder = Path.Combine(NormalizePath(GameDirPath), CurrentGameProperty._GameVersion.GamePreset.GameType switch
             {
-                GameType.StarRail => $"{Path.GetFileNameWithoutExtension(CurrentGameProperty._GameVersion.GamePreset.GameExecutableName)}_Data\\ScreenShots",
+                GameNameType.StarRail => $"{Path.GetFileNameWithoutExtension(CurrentGameProperty._GameVersion.GamePreset.GameExecutableName)}_Data\\ScreenShots",
                 _ => "ScreenShot"
             });
 
@@ -1837,7 +1837,7 @@ namespace CollapseLauncher.Pages
             ToolTipService.SetToolTip(PlaytimeBtn, formattedText);
         }
 
-        private async void StartPlaytimeCounter(Process proc, PresetConfigV2 gamePreset)
+        private async void StartPlaytimeCounter(Process proc, PresetConfig gamePreset)
         {
             int currentPlaytime = ReadPlaytimeFromRegistry(true, gamePreset.ConfigRegistryLocation);
 

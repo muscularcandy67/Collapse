@@ -142,7 +142,7 @@ namespace CollapseLauncher.Helper.Background.Loaders
 
                 await GetPreviewAsColorPalette(filePath);
 
-                CurrentMediaStream = File.OpenRead(filePath);
+                CurrentMediaStream = BackgroundMediaUtility.GetAlternativeFileStream() ?? File.OpenRead(filePath);
                 CurrentMediaPlayer = new MediaPlayer();
 
                 if (InnerLauncherConfig.IsWindowCurrentlyFocused())

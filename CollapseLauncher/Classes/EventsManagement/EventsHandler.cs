@@ -315,7 +315,7 @@ namespace CollapseLauncher
     #region BackgroundRegion
     internal static class BackgroundImgChanger
     {
-        static BackgroundImgChangerInvoker invoker = new BackgroundImgChangerInvoker();
+        static BackgroundImgChangerInvoker invoker = new();
         public static async Task WaitForBackgroundToLoad() => await invoker!.WaitForBackgroundToLoad();
         public static void ChangeBackground(string ImgPath, bool IsCustom = true, bool IsForceRecreateCache = false, bool IsRequestInit = false) => invoker!.ChangeBackground(ImgPath, IsCustom, IsForceRecreateCache, IsRequestInit);
         public static void ToggleBackground(bool Hide) => invoker!.ToggleBackground(Hide);
@@ -335,10 +335,10 @@ namespace CollapseLauncher
     {
         internal BackgroundImgProperty(string ImgPath, bool IsCustom, bool IsForceRecreateCache, bool IsRequestInit)
         {
-            this.ImgPath = ImgPath;
-            this.IsCustom = IsCustom;
+            this.ImgPath              = ImgPath;
+            this.IsCustom             = IsCustom;
             this.IsForceRecreateCache = IsForceRecreateCache;
-            this.IsRequestInit = IsRequestInit;
+            this.IsRequestInit        = IsRequestInit;
         }
 
         public bool IsRequestInit { get; set; }

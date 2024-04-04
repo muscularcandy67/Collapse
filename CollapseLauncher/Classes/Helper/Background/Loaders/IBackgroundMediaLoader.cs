@@ -9,10 +9,10 @@ namespace CollapseLauncher.Helper.Background.Loaders
     internal interface IBackgroundMediaLoader
     {
         ValueTask LoadAsync(string filePath, bool isForceRecreateCache = false, bool isRequestInit = false, CancellationToken token = default);
-        ValueTask DimmAsync(CancellationToken token = default);
+        ValueTask DimmAsync(CancellationToken   token = default);
         ValueTask UndimmAsync(CancellationToken token = default);
-        ValueTask ShowAsync(CancellationToken token = default);
-        ValueTask HideAsync(CancellationToken token = default);
+        ValueTask ShowAsync(CancellationToken   token = default);
+        ValueTask HideAsync(CancellationToken   token = default);
         void Mute();
         void Unmute();
         void SetVolume(double value);

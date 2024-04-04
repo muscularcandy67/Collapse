@@ -1,3 +1,6 @@
+#if !DISABLEDISCORD
+using CollapseLauncher.DiscordPresence;
+#endif
 using CollapseLauncher.Extension;
 using CollapseLauncher.Helper.Animation;
 using CollapseLauncher.Helper.Background;
@@ -5,9 +8,6 @@ using CollapseLauncher.Helper.Image;
 using CollapseLauncher.Pages.OOBE;
 using Hi3Helper;
 using Hi3Helper.Data;
-#if !DISABLEDISCORD
-using Hi3Helper.DiscordPresence;
-#endif
 using Hi3Helper.Shared.ClassStruct;
 using Hi3Helper.Shared.Region;
 using Microsoft.UI.Xaml;
@@ -29,8 +29,10 @@ using static CollapseLauncher.FileDialogCOM.FileDialogNative;
 using static Hi3Helper.Locale;
 using static Hi3Helper.Logger;
 using static Hi3Helper.Shared.Region.LauncherConfig;
+using MediaType = CollapseLauncher.Helper.Background.BackgroundMediaUtility.MediaType;
 using TaskSched = Microsoft.Win32.TaskScheduler.Task;
 using Task = System.Threading.Tasks.Task;
+using CollapseLauncher.Helper.Metadata;
 
 // ReSharper disable PossibleNullReferenceException
 // ReSharper disable AssignNullToNotNullAttribute
@@ -165,8 +167,8 @@ namespace CollapseLauncher.Pages
                     try
                     {
                         var collapsePath = Process.GetCurrentProcess().MainModule?.FileName;
-                        if (collapsePath == null || AppGameConfigMetadataFolder == null) return;
-                        Directory.Delete(AppGameConfigMetadataFolder, true);
+                        if (collapsePath == null || LauncherMetadataHelper.LauncherMetadataFolder == null) return;
+                        Directory.Delete(LauncherMetadataHelper.LauncherMetadataFolder, true);
                         Process.Start(collapsePath);
                         (m_window as MainWindow)?.CloseApp();
                     }
@@ -369,10 +371,31 @@ namespace CollapseLauncher.Pages
             string file = await GetFilePicker(ImageLoaderHelper.SupportedImageFormats);
             if (!string.IsNullOrEmpty(file))
             {
+                var currentMediaType = BackgroundMediaUtility.GetMediaType(file);
+
+                if (currentMediaType == MediaType.StillImage)
+                {
+                    FileStream croppedImage = await ImageLoaderHelper.LoadImage(file, true, true);
+
+                    if (croppedImage == null) return;
+                    BackgroundMediaUtility.SetAlternativeFileStream(croppedImage);
+                }
+
                 regionBackgroundProp.imgLocalPath = file;
                 SetAndSaveConfigValue("CustomBGPath", file);
                 BGPathDisplay.Text = file;
-                BackgroundImgChanger.ChangeBackground(file, true, true, true);
+                BackgroundImgChanger.ChangeBackground(regionBackgroundProp.imgLocalPath, true, true, true);
+                
+                if (currentMediaType == MediaType.Media)
+                {
+                    CustomBGImageSettings.Visibility = Visibility.Collapsed;
+                    CustomBGVideoSettings.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    CustomBGImageSettings.Visibility = IsWaifu2XUsable ? Visibility.Visible : Visibility.Collapsed;
+                    CustomBGVideoSettings.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
@@ -425,11 +448,24 @@ namespace CollapseLauncher.Pages
                 {
                     AppBGCustomizer.Visibility = Visibility.Visible;
                     AppBGCustomizerNote.Visibility = Visibility.Visible;
+                    var currentMediaType = BackgroundMediaUtility.GetMediaType(regionBackgroundProp.imgLocalPath);
+                    if (currentMediaType == MediaType.Media)
+                    {
+                        CustomBGImageSettings.Visibility = Visibility.Collapsed;
+                        CustomBGVideoSettings.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        CustomBGImageSettings.Visibility = IsWaifu2XUsable ? Visibility.Visible : Visibility.Collapsed;
+                        CustomBGVideoSettings.Visibility = Visibility.Collapsed;
+                    }
                 }
                 else
                 {
-                    AppBGCustomizer.Visibility = Visibility.Collapsed;
-                    AppBGCustomizerNote.Visibility = Visibility.Collapsed;
+                    AppBGCustomizer.Visibility       = Visibility.Collapsed;
+                    AppBGCustomizerNote.Visibility   = Visibility.Collapsed;
+                    CustomBGImageSettings.Visibility = IsWaifu2XUsable ? Visibility.Visible : Visibility.Collapsed;
+                    CustomBGVideoSettings.Visibility = Visibility.Collapsed;
                 }
 
                 BGSelector.IsEnabled = isEnabled;
@@ -443,8 +479,10 @@ namespace CollapseLauncher.Pages
                     BGPathDisplay.Text = Lang._Misc.NotSelected;
                     regionBackgroundProp.imgLocalPath = GetAppConfigValue("CurrentBackground").ToString();
                     m_mainPage?.ChangeBackgroundImageAsRegionAsync();
-                    AppBGCustomizer.Visibility = Visibility.Collapsed;
-                    AppBGCustomizerNote.Visibility = Visibility.Collapsed;
+                    AppBGCustomizer.Visibility       = Visibility.Collapsed;
+                    AppBGCustomizerNote.Visibility   = Visibility.Collapsed;
+                    CustomBGImageSettings.Visibility = IsWaifu2XUsable ? Visibility.Visible : Visibility.Collapsed;
+                    CustomBGVideoSettings.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
@@ -466,8 +504,20 @@ namespace CollapseLauncher.Pages
                     }
                     BGPathDisplay.Text = regionBackgroundProp.imgLocalPath;
                     BackgroundImgChanger.ChangeBackground(regionBackgroundProp.imgLocalPath, true, true, false);
-                    AppBGCustomizer.Visibility = Visibility.Visible;
-                    AppBGCustomizerNote.Visibility = Visibility.Visible;
+                    AppBGCustomizer.Visibility       = Visibility.Visible;
+                    AppBGCustomizerNote.Visibility   = Visibility.Visible;
+                        
+                    var currentMediaType = BackgroundMediaUtility.GetMediaType(regionBackgroundProp.imgLocalPath);
+                    if (currentMediaType == MediaType.Media)
+                    {
+                        CustomBGImageSettings.Visibility = Visibility.Collapsed;
+                        CustomBGVideoSettings.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        CustomBGImageSettings.Visibility = IsWaifu2XUsable ? Visibility.Visible : Visibility.Collapsed;
+                        CustomBGVideoSettings.Visibility = Visibility.Collapsed;
+                    }
                 }
                 BGSelector.IsEnabled = value;
             }
@@ -621,7 +671,7 @@ namespace CollapseLauncher.Pages
             set
             {
                 SetAndSaveConfigValue("EnableAcrylicEffect", value);
-                if (BackgroundMediaUtility.CurrentAppliedMediaType == BackgroundMediaUtility.MediaType.StillImage)
+                if (BackgroundMediaUtility.CurrentAppliedMediaType == MediaType.StillImage)
                     App.ToggleBlurBackdrop(value);
             }
         }
@@ -766,10 +816,11 @@ namespace CollapseLauncher.Pages
             set
             {
                 if (value < 0) return;
-                CurrentWindowSizeName = WindowSizeProfilesKey[value];
+                CurrentWindowSizeName     = WindowSizeProfilesKey[value];
+                BGPathDisplayViewer.Width = CurrentWindowSize.SettingsPanelWidth;
                 var delayedDragAreaChange = async () =>
                 {
-                    await System.Threading.Tasks.Task.Delay(250);
+                    await Task.Delay(250);
                     ChangeTitleDragArea.Change(DragAreaTemplate.Default);
                 };
                 delayedDragAreaChange();

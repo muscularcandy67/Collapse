@@ -70,8 +70,8 @@ namespace CollapseLauncher.Helper.Background.Loaders
 
                 // Get the image stream
                 token.ThrowIfCancellationRequested();
-                await using (FileStream? imageStream =
-                             await ImageLoaderHelper.LoadImage(filePath, isRequestInit, isImageLoadForFirstTime))
+                await using (FileStream? imageStream = BackgroundMediaUtility.GetAlternativeFileStream() ??
+                              await ImageLoaderHelper.LoadImage(filePath, false, isImageLoadForFirstTime))
                 {
                     // Return if the stream is null due to cancellation or an error.
                     if (imageStream == null)
