@@ -47,6 +47,7 @@ using Orientation = Microsoft.UI.Xaml.Controls.Orientation;
 using Hi3Helper.EncTool.WindowTool;
 using CollapseLauncher.Extension;
 using CollapseLauncher.Helper.Metadata;
+using CollapseLauncher.Helper;
 
 namespace CollapseLauncher.Pages
 {
@@ -261,13 +262,14 @@ namespace CollapseLauncher.Pages
                     using (Stream copyIconFileStream = new MemoryStream())
                         await using (Stream iconFileStream = await FallbackCDNUtil.GetHttpStreamFromResponse(regionNewsProp.eventPanel.icon, PageToken.Token))
                         {
+                            double scaleFactor = WindowUtility.CurrentWindowMonitorScaleFactor;
                             // Copy remote stream to memory stream
                             await iconFileStream.CopyToAsync(copyIconFileStream);
                             copyIconFileStream.Position = 0;
                             // Get the icon image information and set the resized frame size
                             ImageFileInfo iconImageInfo = await Task.Run(() => ImageFileInfo.Load(copyIconFileStream));
-                            int width = (int)(iconImageInfo.Frames[0].Width * m_appDPIScale);
-                            int height = (int)(iconImageInfo.Frames[0].Height * m_appDPIScale);
+                            int width = (int)(iconImageInfo.Frames[0].Width * scaleFactor);
+                            int height = (int)(iconImageInfo.Frames[0].Height * scaleFactor);
 
                             copyIconFileStream.Position = 0; // Reset the original icon stream position
                             await ImageLoaderHelper.ResizeImageStream(copyIconFileStream, cachedIconFileStream, (uint)width, (uint)height); // Start resizing
@@ -908,7 +910,7 @@ namespace CollapseLauncher.Pages
         #region Community Button
         private void OpenCommunityButtonLink(object sender, RoutedEventArgs e)
         {
-            DispatcherQueue.TryEnqueue(() => CommunityToolsBtn.Flyout.Hide());
+            DispatcherQueue?.TryEnqueue(() => CommunityToolsBtn.Flyout.Hide());
             OpenButtonLinkFromTag(sender, e);
         }
         #endregion
@@ -1037,12 +1039,12 @@ namespace CollapseLauncher.Pages
 
         private void PreloadDownloadStatus(object sender, TotalPerfileStatus e)
         {
-            DispatcherQueue.TryEnqueue(() => ProgressPrePerFileStatusFooter.Text = e.ActivityStatus);
+            DispatcherQueue?.TryEnqueue(() => ProgressPrePerFileStatusFooter.Text = e.ActivityStatus);
         }
 
         private void PreloadDownloadProgress(object sender, TotalPerfileProgress e)
         {
-            DispatcherQueue.TryEnqueue(() =>
+            DispatcherQueue?.TryEnqueue(() =>
             {
                 string InstallDownloadSpeedString = SummarizeSizeSimple(e.ProgressTotalSpeed);
                 string InstallDownloadSizeString = SummarizeSizeSimple(e.ProgressTotalDownload);
@@ -1160,7 +1162,7 @@ namespace CollapseLauncher.Pages
             if (DispatcherQueue.HasThreadAccess)
                 GameInstall_StatusChanged_Inner(e);
             else
-                DispatcherQueue.TryEnqueue(() => GameInstall_StatusChanged_Inner(e));
+                DispatcherQueue?.TryEnqueue(() => GameInstall_StatusChanged_Inner(e));
         }
 
         private void GameInstall_StatusChanged_Inner(TotalPerfileStatus e)
@@ -1177,7 +1179,7 @@ namespace CollapseLauncher.Pages
             if (DispatcherQueue.HasThreadAccess)
                 GameInstall_ProgressChanged_Inner(e);
             else
-                DispatcherQueue.TryEnqueue(() => GameInstall_ProgressChanged_Inner(e));
+                DispatcherQueue?.TryEnqueue(() => GameInstall_ProgressChanged_Inner(e));
         }
 
         private void GameInstall_ProgressChanged_Inner(TotalPerfileProgress e)
@@ -1303,15 +1305,15 @@ namespace CollapseLauncher.Pages
                 switch (GetAppConfigValue("GameLaunchedBehavior").ToString())
                 {
                     case "Minimize":
-                        (m_window as MainWindow)?.Minimize();
+                        WindowUtility.WindowMinimize();
                         break;
                     case "ToTray":
-                        (m_window as MainWindow)?.ToggleToTray_MainWindow();
+                        WindowUtility.ToggleToTray_MainWindow();
                         break;
                     case "Nothing":
                         break;
                     default:
-                        (m_window as MainWindow)?.Minimize();
+                        WindowUtility.WindowMinimize();
                         break;
                 }
 
@@ -1362,16 +1364,16 @@ namespace CollapseLauncher.Pages
             switch (GetAppConfigValue("GameLaunchedBehavior").ToString())
             {
                 case "Minimize":
-                    (m_window as MainWindow)?.Restore();
+                    WindowUtility.WindowRestore();
                     break;
                 case "ToTray":
-                    H.NotifyIcon.WindowExtensions.Show(m_window!);
-                    (m_window as MainWindow)?.Restore();
+                    H.NotifyIcon.WindowExtensions.Show(WindowUtility.CurrentWindow!);
+                    WindowUtility.WindowRestore();
                     break;
                 case "Nothing":
                     break;
                 default:
-                    (m_window as MainWindow)?.Restore();
+                    WindowUtility.WindowRestore();
                     break;
             }
 
@@ -1864,7 +1866,7 @@ namespace CollapseLauncher.Pages
                         elapsedSeconds = numOfLoops * 60;
 
                     if (GamePropertyVault.GetCurrentGameProperty()._GamePreset.ProfileName == gamePreset.ProfileName)
-                        m_homePage?.DispatcherQueue.TryEnqueue(() =>
+                        m_homePage?.DispatcherQueue?.TryEnqueue(() =>
                         {
                             m_homePage.UpdatePlaytime(false, currentPlaytime + elapsedSeconds);
                         });
@@ -1891,7 +1893,7 @@ namespace CollapseLauncher.Pages
             SavePlaytimeToRegistry(true, gamePreset.ConfigRegistryLocation, currentPlaytime + elapsedSeconds);
             LogWriteLine($"Added {elapsedSeconds}s [{elapsedSeconds / 3600}h {elapsedSeconds % 3600 / 60}m {elapsedSeconds % 3600 % 60}s] to {gamePreset.ProfileName} playtime.", LogType.Default, true);
             if (GamePropertyVault.GetCurrentGameProperty()._GamePreset.ProfileName == gamePreset.ProfileName)
-                m_homePage?.DispatcherQueue.TryEnqueue(() =>
+                m_homePage?.DispatcherQueue?.TryEnqueue(() =>
                 {
                     m_homePage.UpdatePlaytime(false, currentPlaytime + elapsedSeconds);
                 });

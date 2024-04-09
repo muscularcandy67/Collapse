@@ -9,11 +9,8 @@ using Windows.Graphics.Imaging;
 using Windows.Media.Playback;
 using Windows.Storage;
 using Windows.Storage.FileProperties;
-using Windows.UI;
 using CollapseLauncher.Extension;
 using CollapseLauncher.Helper.Animation;
-using ColorThiefDotNet;
-using CommunityToolkit.WinUI;
 using CommunityToolkit.WinUI.Animations;
 using Hi3Helper;
 using Hi3Helper.Shared.Region;
@@ -24,8 +21,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using ImageUI = Microsoft.UI.Xaml.Controls.Image;
-using Microsoft.UI;
-using CollapseLauncher.Helper.Image;
+using System.Threading.Tasks.Dataflow;
 
 #nullable enable
 namespace CollapseLauncher.Helper.Background.Loaders
@@ -44,19 +40,24 @@ namespace CollapseLauncher.Helper.Background.Loaders
 
         private Grid AcrylicMask     { get; }
         private Grid OverlayTitleBar { get; }
-
+        
+        public   bool                            IsBackgroundDimm { get; set; }
         private  bool                            IsMediaPlayerLoading   { get; set; }
-        internal bool                            IsMediaPlayerDimm      { get; set; }
         private  FileStream?                     CurrentMediaStream     { get; set; }
         private  MediaPlayer?                    CurrentMediaPlayer     { get; set; }
         private  Stopwatch?                      CurrentStopwatch       { get; set; }
         private  CancellationTokenSourceWrapper? InnerCancellationToken { get; set; }
         private  List<bool>?                     FocusState             { get; set; }
+        private ActionBlock<ValueTask>?          ActionTaskQueue        { get; set; }
 
         private SoftwareBitmap?    CurrentFrameBitmap       { get; set; }
         private CanvasImageSource? CurrentCanvasImageSource { get; set; }
         private CanvasDevice?      CanvasDevice             { get; set; }
+
+#if USEDYNAMICVIDEOPALETTE
         private CanvasBitmap?      CanvasBitmap             { get; set; }
+
+#endif
 
         internal MediaPlayerLoader(
             FrameworkElement parentUI,
@@ -80,6 +81,30 @@ namespace CollapseLauncher.Helper.Background.Loaders
                                                                                        .UniformToFill));
 
             IsMediaPlayerLoading = false;
+            ActionTaskQueue = new ActionBlock<ValueTask>(async (action) => {
+                await action.ConfigureAwait(false);
+            },
+                new ExecutionDataflowBlockOptions
+                {
+                    EnsureOrdered = true,
+                    MaxMessagesPerTask = 1,
+                    MaxDegreeOfParallelism = 1,
+                    TaskScheduler = TaskScheduler.Default
+                });
+        }
+
+        ~MediaPlayerLoader() => Dispose();
+
+        public void Dispose()
+        {
+            CurrentMediaPlayer?.Dispose();
+            CurrentStopwatch?.Stop();
+            InnerCancellationToken?.Dispose();
+            CurrentFrameBitmap?.Dispose();
+            CanvasDevice?.Dispose();
+            CurrentMediaStream?.Dispose();
+
+            GC.SuppressFinalize(this);
         }
 
         public async ValueTask LoadAsync(string            filePath, bool isImageLoadForFirstTime, bool isRequestInit,
@@ -156,7 +181,7 @@ namespace CollapseLauncher.Helper.Background.Loaders
                 CurrentMediaStream = BackgroundMediaUtility.GetAlternativeFileStream() ?? File.OpenRead(filePath);
                 CurrentMediaPlayer = new MediaPlayer();
 
-                if (InnerLauncherConfig.IsWindowCurrentlyFocused())
+                if (WindowUtility.IsCurrentWindowInFocus())
                 {
                     CurrentMediaPlayer.AutoPlay = true;
                 }
@@ -197,7 +222,7 @@ namespace CollapseLauncher.Helper.Background.Loaders
 #if USEDYNAMICVIDEOPALETTE
         private void FrameGrabberEvent(MediaPlayer mediaPlayer, object args)
         {
-            ParentUI.DispatcherQueue.TryEnqueue(() =>
+            ParentUI?.DispatcherQueue?.TryEnqueue(() =>
             {
                 int bitmapWidth  = CurrentFrameBitmap?.PixelWidth ?? 0;
                 int bitmapHeight = CurrentFrameBitmap?.PixelHeight ?? 0;
@@ -249,7 +274,7 @@ namespace CollapseLauncher.Helper.Background.Loaders
                     ? adjustedColor.GetDarkColor()
                     : adjustedColor.GetLightColor();
 
-                ParentUI.DispatcherQueue.TryEnqueue(() => ColorPaletteUtility.SetColorPalette(ParentUI, adjustedColor));
+                ParentUI?.DispatcherQueue?.TryEnqueue(() => ColorPaletteUtility.SetColorPalette(ParentUI, adjustedColor));
             });
         }
 #endif
@@ -262,38 +287,21 @@ namespace CollapseLauncher.Helper.Background.Loaders
             }
         }
 
-        public async ValueTask DimmAsync(CancellationToken token)
+        public void Dimm(CancellationToken token)
         {
-            while (IsMediaPlayerLoading)
-            {
-                await Task.Delay(250, token);
-            }
-
-            if (!IsMediaPlayerDimm)
-            {
-                await ToggleImageVisibility(true);
-            }
-
-            IsMediaPlayerDimm = true;
+            ActionTaskQueue?.Post(ToggleImageVisibility(true));
         }
 
-        public async ValueTask UndimmAsync(CancellationToken token)
+        public void Undimm(CancellationToken token)
         {
-            while (IsMediaPlayerLoading)
-            {
-                await Task.Delay(250, token);
-            }
-
-            if (IsMediaPlayerDimm)
-            {
-                await ToggleImageVisibility(false);
-            }
-
-            IsMediaPlayerDimm = false;
+            ActionTaskQueue?.Post(ToggleImageVisibility(false));
         }
 
         private async ValueTask ToggleImageVisibility(bool hideImage)
         {
+            if (IsBackgroundDimm == hideImage) return;
+            IsBackgroundDimm = hideImage;
+
             TimeSpan duration = TimeSpan.FromSeconds(hideImage
                                                          ? BackgroundMediaUtility.TransitionDuration
                                                          : BackgroundMediaUtility.TransitionDurationSlow);

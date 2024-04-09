@@ -34,6 +34,7 @@ using static Hi3Helper.Shared.Region.LauncherConfig;
 using static CollapseLauncher.Statics.GamePropertyVault;
 using Brush = Microsoft.UI.Xaml.Media.Brush;
 using CollapseLauncher.Helper.Animation;
+using CollapseLauncher.Helper;
 
 namespace CollapseLauncher.Pages
 {
@@ -61,15 +62,14 @@ namespace CollapseLauncher.Pages
             try
             {
                 CurrentGameProperty = GetCurrentGameProperty();
-                DispatcherQueue.TryEnqueue(() =>
+                DispatcherQueue?.TryEnqueue(() =>
                 {
                     RegistryWatcher = new RegistryMonitor(RegistryHive.CurrentUser, Path.Combine($"Software\\{CurrentGameProperty._GameVersion.VendorTypeProp.VendorType}", CurrentGameProperty._GameVersion.GamePreset.InternalGameNameInConfig!));
                     ToggleRegistrySubscribe(true);
                 });
-
-                DisplayInformation displayInfo = DisplayInformation.CreateForWindowId(InnerLauncherConfig.m_windowID);
+                
                 // ReSharper disable once UnusedVariable
-                DisplayAdvancedColorInfo colorInfo = displayInfo.GetAdvancedColorInfo();
+                DisplayAdvancedColorInfo colorInfo = WindowUtility.CurrentWindowDisplayColorInfo;
 #if SIMULATEGIHDR
                 IsHDREnabled = true;
                 IsHDRSupported = true;
@@ -100,7 +100,7 @@ namespace CollapseLauncher.Pages
             if (!IsNoReload)
             {
                 LogWriteLine("[GI GSP Module] RegistryMonitor has detected registry change outside of the launcher! Reloading the page...", LogType.Warning, true);
-                DispatcherQueue.TryEnqueue(MainFrameChanger.ReloadCurrentMainFrame);
+                DispatcherQueue?.TryEnqueue(MainFrameChanger.ReloadCurrentMainFrame);
             }
         }
 
@@ -264,7 +264,7 @@ namespace CollapseLauncher.Pages
         
         private void OnUnload(object sender, RoutedEventArgs e)
         {
-            DispatcherQueue.TryEnqueue(() =>
+            DispatcherQueue?.TryEnqueue(() =>
             {
                 try
                 {

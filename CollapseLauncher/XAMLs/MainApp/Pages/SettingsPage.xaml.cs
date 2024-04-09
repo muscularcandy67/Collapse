@@ -33,6 +33,7 @@ using MediaType = CollapseLauncher.Helper.Background.BackgroundMediaUtility.Medi
 using TaskSched = Microsoft.Win32.TaskScheduler.Task;
 using Task = System.Threading.Tasks.Task;
 using CollapseLauncher.Helper.Metadata;
+using CollapseLauncher.Helper;
 
 // ReSharper disable PossibleNullReferenceException
 // ReSharper disable AssignNullToNotNullAttribute
@@ -170,7 +171,7 @@ namespace CollapseLauncher.Pages
                         if (collapsePath == null || LauncherMetadataHelper.LauncherMetadataFolder == null) return;
                         Directory.Delete(LauncherMetadataHelper.LauncherMetadataFolder, true);
                         Process.Start(collapsePath);
-                        (m_window as MainWindow)?.CloseApp();
+                        (WindowUtility.CurrentWindow as MainWindow)?.CloseApp();
                     }
                     catch (Exception ex)
                     {
@@ -278,7 +279,7 @@ namespace CollapseLauncher.Pages
                         Verb = "runas"
                     }
                 }.Start();
-                (m_window as MainWindow)?.CloseApp();
+                (WindowUtility.CurrentWindow as MainWindow)?.CloseApp();
             }
             catch
             {
@@ -605,9 +606,9 @@ namespace CollapseLauncher.Pages
             set
             {
                 if (!value)
-                    BackgroundMediaUtility.Mute();
+                    BackgroundMediaUtility.Current?.Mute();
                 else
-                    BackgroundMediaUtility.Unmute();
+                    BackgroundMediaUtility.Current?.Unmute();
             }
         }
 
@@ -617,9 +618,9 @@ namespace CollapseLauncher.Pages
             {
                 double value = GetAppConfigValue("BackgroundAudioVolume").ToDouble();
                 if (value < 0)
-                    BackgroundMediaUtility.SetVolume(0d);
+                    BackgroundMediaUtility.Current?.SetVolume(0d);
                 if (value > 1)
-                    BackgroundMediaUtility.SetVolume(1d);
+                    BackgroundMediaUtility.Current?.SetVolume(1d);
 
                 return value * 100d;
             }
@@ -627,7 +628,7 @@ namespace CollapseLauncher.Pages
             {
                 if (value < 0) return;
                 double downValue = value / 100d;
-                BackgroundMediaUtility.SetVolume(downValue);
+                BackgroundMediaUtility.Current?.SetVolume(downValue);
             }
         }
 
@@ -671,7 +672,7 @@ namespace CollapseLauncher.Pages
             set
             {
                 SetAndSaveConfigValue("EnableAcrylicEffect", value);
-                if (BackgroundMediaUtility.CurrentAppliedMediaType == MediaType.StillImage)
+                if (BackgroundMediaUtility.Current?.CurrentAppliedMediaType == MediaType.StillImage)
                     App.ToggleBlurBackdrop(value);
             }
         }
