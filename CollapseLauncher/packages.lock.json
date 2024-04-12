@@ -161,12 +161,6 @@
           "Microsoft.WindowsAppSDK": "1.5.240227000"
         }
       },
-      "Microsoft.NET.ILLink.Tasks": {
-        "type": "Direct",
-        "requested": "[8.0.4, )",
-        "resolved": "8.0.4",
-        "contentHash": "PZb5nfQ+U19nhnmnR9T1jw+LTmozhuG2eeuzuW5A7DqxD/UXW2ucjmNJqnqOuh8rdPzM3MQXoF8AfFCedJdCUw=="
-      },
       "Microsoft.NETCore.Platforms": {
         "type": "Direct",
         "requested": "[8.0.0-preview.7.23375.6, )",
@@ -956,15 +950,15 @@
       "hi3helper.core": {
         "type": "Project",
         "dependencies": {
-          "Hi3Helper.EncTool": "[1.0.0, )",
-          "Hi3Helper.Http": "[1.0.0, )"
+          "Hi3Helper.EncTool": "[1.80.0, )",
+          "Hi3Helper.Http": "[1.80.0, )"
         }
       },
       "hi3helper.enctool": {
         "type": "Project",
         "dependencies": {
           "Google.Protobuf": "[3.26.1, )",
-          "Hi3Helper.Http": "[1.0.0, )",
+          "Hi3Helper.Http": "[1.80.0, )",
           "System.IO.Hashing": "[8.0.0, )"
         }
       },
@@ -974,7 +968,7 @@
       "innosetuphelper": {
         "type": "Project",
         "dependencies": {
-          "Hi3Helper.Core": "[1.0.0, )",
+          "Hi3Helper.Core": "[1.80.0, )",
           "System.IO.Hashing": "[8.0.0, )"
         }
       },
