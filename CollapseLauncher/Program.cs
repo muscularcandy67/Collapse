@@ -1,4 +1,5 @@
-﻿using Hi3Helper;
+﻿using CollapseLauncher.Helper.Update;
+using Hi3Helper;
 using Hi3Helper.Http;
 using Hi3Helper.Shared.ClassStruct;
 using Microsoft.UI.Dispatching;
@@ -7,8 +8,7 @@ using Squirrel;
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -18,14 +18,12 @@ using static CollapseLauncher.InnerLauncherConfig;
 using static Hi3Helper.Locale;
 using static Hi3Helper.Logger;
 using static Hi3Helper.Shared.Region.LauncherConfig;
-using System.IO;
 
 namespace CollapseLauncher
 {
     public static class MainEntryPoint
     {
-        public static int       InstanceCount;
-        public static Process[] InstanceProcesses;
+        public static int InstanceCount;
         
         [DllImport("Microsoft.ui.xaml.dll")]
         private static extern void XamlCheckProcessRequirements();
@@ -36,8 +34,6 @@ namespace CollapseLauncher
 #if PREVIEW
             IsPreview = true;
 #endif
-            AppCurrentVersion       = new GameVersion(Assembly.GetExecutingAssembly().GetName().Version);
-            AppCurrentVersionString = AppCurrentVersion.VersionString;
 
             try
             {
@@ -67,7 +63,7 @@ namespace CollapseLauncher
                 }
 
                 LogWriteLine(string.Format("Running Collapse Launcher [{0}], [{3}], under {1}, as {2}",
-                    AppCurrentVersion.VersionString,
+                    LauncherUpdateHelper.LauncherCurrentVersionString,
                     GetVersionString(),
                     Environment.UserName,
                     IsPreview ? "Preview" : "Stable"), LogType.Scheme, true);
@@ -124,23 +120,7 @@ namespace CollapseLauncher
 
                 AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
-                InstanceCount     = InvokeProp.GetInstanceCount();
-                InstanceProcesses = InvokeProp.GetInstanceProcesses();
-                
-                LogWriteLine($"Detected {InstanceCount} instances", LogType.Default, false);
-                
-                if (InstanceCount > 1)
-                {
-                    LogWriteLine($"Multiple instances found! This is instance #{InstanceCount}",
-                                 LogType.Scheme, true);
-                    LogWriteLine($"Enumerating instances...", LogType.Debug, false);
-                    foreach (Process p in InstanceProcesses)
-                    {
-                        LogWriteLine($"Name: {p.ProcessName}", LogType.NoTag, false);
-                        LogWriteLine($"MainModule: {p.MainModule}", LogType.NoTag, false);
-                        LogWriteLine($"PID: {p.Id}", LogType.NoTag, false);
-                    }
-                }
+                InstanceCount = InvokeProp.EnumerateInstances();
                 
                 AppActivation.Enable();
                 if (!AppActivation.DecideRedirection())

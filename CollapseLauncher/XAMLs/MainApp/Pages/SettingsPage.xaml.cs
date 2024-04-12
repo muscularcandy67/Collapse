@@ -1,39 +1,42 @@
 #if !DISABLEDISCORD
-using CollapseLauncher.DiscordPresence;
+    using CollapseLauncher.DiscordPresence;
 #endif
-using CollapseLauncher.Extension;
-using CollapseLauncher.Helper.Animation;
-using CollapseLauncher.Helper.Background;
-using CollapseLauncher.Helper.Image;
-using CollapseLauncher.Pages.OOBE;
-using Hi3Helper;
-using Hi3Helper.Data;
-using Hi3Helper.Shared.ClassStruct;
-using Hi3Helper.Shared.Region;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.Win32.TaskScheduler;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using static CollapseLauncher.Dialogs.SimpleDialogs;
-using static CollapseLauncher.Helper.Image.Waifu2X;
-using static CollapseLauncher.InnerLauncherConfig;
-using static CollapseLauncher.RegionResourceListHelper;
-using static CollapseLauncher.WindowSize.WindowSize;
-using static CollapseLauncher.FileDialogCOM.FileDialogNative;
-using static Hi3Helper.Locale;
-using static Hi3Helper.Logger;
-using static Hi3Helper.Shared.Region.LauncherConfig;
-using MediaType = CollapseLauncher.Helper.Background.BackgroundMediaUtility.MediaType;
-using TaskSched = Microsoft.Win32.TaskScheduler.Task;
-using Task = System.Threading.Tasks.Task;
-using CollapseLauncher.Helper.Metadata;
-using CollapseLauncher.Helper;
+    using CollapseLauncher.Dialogs;
+    using CollapseLauncher.Extension;
+    using CollapseLauncher.Helper;
+    using CollapseLauncher.Helper.Animation;
+    using CollapseLauncher.Helper.Background;
+    using CollapseLauncher.Helper.Image;
+    using CollapseLauncher.Helper.Metadata;
+    using CollapseLauncher.Helper.Update;
+    using CollapseLauncher.Pages.OOBE;
+    using Hi3Helper;
+    using Hi3Helper.Data;
+    using Hi3Helper.Shared.ClassStruct;
+    using Hi3Helper.Shared.Region;
+    using Microsoft.UI.Xaml;
+    using Microsoft.UI.Xaml.Controls;
+    using Microsoft.UI.Xaml.Input;
+    using Microsoft.UI.Xaml.Media;
+    using Microsoft.Win32.TaskScheduler;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using static CollapseLauncher.Dialogs.SimpleDialogs;
+    using static CollapseLauncher.Helper.Image.Waifu2X;
+    using static CollapseLauncher.InnerLauncherConfig;
+    using static CollapseLauncher.RegionResourceListHelper;
+    using static CollapseLauncher.WindowSize.WindowSize;
+    using static CollapseLauncher.FileDialogCOM.FileDialogNative;
+    using static Hi3Helper.Locale;
+    using static Hi3Helper.Logger;
+    using static Hi3Helper.Shared.Region.LauncherConfig;
+    using MediaType = CollapseLauncher.Helper.Background.BackgroundMediaUtility.MediaType;
+    using TaskSched = Microsoft.Win32.TaskScheduler.Task;
+    using Task = System.Threading.Tasks.Task;
 
 // ReSharper disable PossibleNullReferenceException
 // ReSharper disable AssignNullToNotNullAttribute
@@ -65,7 +68,7 @@ namespace CollapseLauncher.Pages
             LoadAppConfig();
             this.DataContext = this;
 
-            string Version = $" {AppCurrentVersion.VersionString}";
+            string Version = $" {LauncherUpdateHelper.LauncherCurrentVersionString}";
 #if DEBUG
             Version = Version + "d";
 #endif
@@ -108,7 +111,7 @@ namespace CollapseLauncher.Pages
 
         private string GitVersionIndicator_Builder()
         {
-            var branchName = ThisAssembly.Git.Branch;
+            var branchName  = ThisAssembly.Git.Branch;
             var commitShort = ThisAssembly.Git.Commit;
 
             // Add indicator if the commit is dirty
@@ -289,34 +292,25 @@ namespace CollapseLauncher.Pages
 
         private async void CheckUpdate(object sender, RoutedEventArgs e)
         {
-
-            if (LauncherUpdateWatcher.isMetered)
-            {
-                switch (await Dialog_MeteredConnectionWarning(Content))
-                {
-                    case ContentDialogResult.Primary:
-                        UpdateLoadingStatus.Visibility = Visibility.Visible;
-                        UpdateAvailableStatus.Visibility = Visibility.Collapsed;
-                        UpToDateStatus.Visibility = Visibility.Collapsed;
-                        CheckUpdateBtn.IsEnabled = false;
-                        ForceInvokeUpdate = true;
-                        LauncherUpdateInvoker.UpdateEvent += LauncherUpdateInvoker_UpdateEvent;
-                        LauncherUpdateWatcher.StartCheckUpdate(true);
-                        break;
-
-                    case ContentDialogResult.Secondary:
-                        return;
-                }
-            }
-            else
+            try
             {
                 UpdateLoadingStatus.Visibility = Visibility.Visible;
                 UpdateAvailableStatus.Visibility = Visibility.Collapsed;
                 UpToDateStatus.Visibility = Visibility.Collapsed;
                 CheckUpdateBtn.IsEnabled = false;
                 ForceInvokeUpdate = true;
+
                 LauncherUpdateInvoker.UpdateEvent += LauncherUpdateInvoker_UpdateEvent;
-                LauncherUpdateWatcher.StartCheckUpdate(true);
+                bool isUpdateAvailable = await LauncherUpdateHelper.IsUpdateAvailable(true);
+                LauncherUpdateWatcher.GetStatus(new LauncherUpdateProperty { IsUpdateAvailable = isUpdateAvailable, NewVersionName = LauncherUpdateHelper.AppUpdateVersionProp.Version.Value });
+            }
+            catch (Exception ex)
+            {
+                ErrorSender.SendException(ex, ErrorType.Unhandled);
+                UpdateLoadingStatus.Visibility = Visibility.Collapsed;
+                UpdateAvailableStatus.Visibility = Visibility.Collapsed;
+                UpToDateStatus.Visibility = Visibility.Collapsed;
+                CheckUpdateBtn.IsEnabled = true;
             }
         }
 
@@ -331,18 +325,17 @@ namespace CollapseLauncher.Pages
                 UpdateAvailableStatus.Visibility = Visibility.Visible;
                 UpToDateStatus.Visibility = Visibility.Collapsed;
                 UpdateAvailableLabel.Text = e.NewVersionName.VersionString + (ChannelName);
-                LauncherUpdateInvoker.UpdateEvent -= LauncherUpdateInvoker_UpdateEvent;
             }
             else
             {
                 UpdateLoadingStatus.Visibility = Visibility.Collapsed;
                 UpdateAvailableStatus.Visibility = Visibility.Collapsed;
                 UpToDateStatus.Visibility = Visibility.Visible;
-                LauncherUpdateInvoker.UpdateEvent -= LauncherUpdateInvoker_UpdateEvent;
             }
+            LauncherUpdateInvoker.UpdateEvent -= LauncherUpdateInvoker_UpdateEvent;
         }
 
-        private void ClickTextLinkFromTag(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        private void ClickTextLinkFromTag(object sender, PointerRoutedEventArgs e)
         {
             if (!e.GetCurrentPoint((UIElement)sender).Properties.IsLeftButtonPressed) return;
             new Process
@@ -401,7 +394,7 @@ namespace CollapseLauncher.Pages
         }
 
         int EggsAttempt = 1;
-        private void Egg(object sender, Microsoft.UI.Xaml.Input.PointerRoutedEventArgs e)
+        private void Egg(object sender, PointerRoutedEventArgs e)
         {
             if (EggsAttempt++ >= 10)
                 HerLegacy.Visibility = Visibility.Visible;
@@ -995,13 +988,13 @@ namespace CollapseLauncher.Pages
         #endregion
 
         #region Keyboard Shortcuts
-        private async void ShowKbScList_Click(Object sender, RoutedEventArgs e) => await Dialogs.KeyboardShortcuts.Dialog_ShowKbShortcuts(this);
+        private async void ShowKbScList_Click(Object sender, RoutedEventArgs e) => await KeyboardShortcuts.Dialog_ShowKbShortcuts(this);
 
         private async void ResetKeylist_Click(object sender, RoutedEventArgs e)
         {
-            if (await Dialogs.SimpleDialogs.Dialog_ResetKeyboardShortcuts(sender as UIElement) == ContentDialogResult.Primary)
+            if (await Dialog_ResetKeyboardShortcuts(sender as UIElement) == ContentDialogResult.Primary)
             {
-                Dialogs.KeyboardShortcuts.ResetKeyboardShortcuts();
+                KeyboardShortcuts.ResetKeyboardShortcuts();
                 KeyboardShortcutsEvent(null, AreShortcutsEnabled ? 1 : 2);
             }
         }

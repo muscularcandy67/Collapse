@@ -1,5 +1,6 @@
 ﻿using CollapseLauncher.Helper.Loading;
 using CollapseLauncher.Helper.Metadata;
+using CollapseLauncher.Helper.Update;
 using CollapseLauncher.Pages;
 using CollapseLauncher.Statics;
 using Hi3Helper;
@@ -72,7 +73,7 @@ namespace CollapseLauncher
         private         HomeMenuPanel LastRegionNewsProp;
         internal static string        PreviousTag = string.Empty;
 
-        internal async Task<bool> LoadRegionFromCurrentConfigV2(PresetConfig preset)
+        internal async Task<bool> LoadRegionFromCurrentConfigV2(PresetConfig preset, string gameName, string gameRegion)
         {
             IsExplicitCancel = false;
             LogWriteLine($"Initializing {RegionToChangeName}...", LogType.Scheme, true);
@@ -120,7 +121,7 @@ namespace CollapseLauncher
             ChangeBackgroundImageAsRegionAsync();
 
             // Finalize Region Load
-            FinalizeLoadRegion(preset);
+            FinalizeLoadRegion(gameName, gameRegion);
             CurrentGameProperty = GamePropertyVault.GetCurrentGameProperty();
 
             GamePropertyVault.AttachNotifForCurrentGame(GamePropertyVault.LastGameHashID);
@@ -572,7 +573,7 @@ namespace CollapseLauncher
                 }
 
                 // Send the exception without changing into the Error page
-                LogWriteLine($"Loading Game: {LauncherMetadataHelper.CurrentMetadataConfigGameName} - {LauncherMetadataHelper.CurrentMetadataConfigGameRegion} has timed-out (> {timeout} seconds). Retrying...", Hi3Helper.LogType.Warning);
+                LogWriteLine($"Loading Game: {LauncherMetadataHelper.CurrentMetadataConfigGameName} - {LauncherMetadataHelper.CurrentMetadataConfigGameRegion} has timed-out (> {timeout} seconds). Retrying...", LogType.Warning);
                 ErrorSender.SendExceptionWithoutPage(ex, ErrorType.Connection);
             });
 
@@ -620,24 +621,26 @@ namespace CollapseLauncher
             DisableKbShortcuts();
         }
 
-        private void FinalizeLoadRegion(PresetConfig preset)
+        private void FinalizeLoadRegion(string gameName, string gameRegion)
         {
+            PresetConfig preset = LauncherMetadataHelper.LauncherMetadataConfig[gameName][gameRegion];
+
             // Log if region has been successfully loaded
             LogWriteLine($"Initializing Region {preset.ZoneFullname} Done!", LogType.Scheme, true);
 
             // Initializing Game Statics
-            LoadGameStaticsByGameType(preset);
+            LoadGameStaticsByGameType(preset, gameName, gameRegion);
 
             // Init NavigationPanel Items
             InitializeNavigationItems();
         }
 
-        private void LoadGameStaticsByGameType(PresetConfig preset)
+        private void LoadGameStaticsByGameType(PresetConfig preset, string gameName, string gameRegion)
         {
             GamePropertyVault.AttachNotifForCurrentGame();
             DisposeAllPageStatics();
 
-            GamePropertyVault.LoadGameProperty(this, _gameAPIProp, preset);
+            GamePropertyVault.LoadGameProperty(this, _gameAPIProp, gameName, gameRegion);
 
             // Spawn Region Notification
             SpawnRegionNotification(preset.ProfileName);
@@ -684,9 +687,9 @@ namespace CollapseLauncher
                 GameVersion? ValidForVerAbove = Entry.ValidForVerAbove != null ? new GameVersion(Entry.ValidForVerAbove) : null;
 
                 if (Entry.RegionProfile == RegionProfileName && IsNotificationTimestampValid(Entry) && (Entry.ValidForVerBelow == null
-                        || (LauncherUpdateWatcher.CompareVersion(AppCurrentVersion, ValidForVerBelow)
-                        && LauncherUpdateWatcher.CompareVersion(ValidForVerAbove, AppCurrentVersion))
-                        || LauncherUpdateWatcher.CompareVersion(AppCurrentVersion, ValidForVerBelow)))
+                        || (LauncherUpdateHelper.LauncherCurrentVersion.Compare(ValidForVerBelow)
+                        && ValidForVerAbove.Compare(LauncherUpdateHelper.LauncherCurrentVersion))
+                        || LauncherUpdateHelper.LauncherCurrentVersion.Compare(ValidForVerBelow)))
                 {
                     NotificationSender.SendNotification(toEntry);
                 }
@@ -751,11 +754,11 @@ namespace CollapseLauncher
 
             // Load Game ConfigV2 List before loading the region
             IsLoadRegionComplete = false;
-            PresetConfig Preset = LauncherMetadataHelper.GetMetadataConfig(GameCategory, GameRegion);
+            PresetConfig Preset = await LauncherMetadataHelper.GetMetadataConfig(GameCategory, GameRegion);
 
             // Start region loading
             ShowAsyncLoadingTimedOutPill();
-            if (await LoadRegionFromCurrentConfigV2(Preset))
+            if (await LoadRegionFromCurrentConfigV2(Preset, GameCategory, GameRegion))
             {
                 LogWriteLine($"Region changed to {Preset.ZoneFullname}", LogType.Scheme, true);
 #if !DISABLEDISCORD

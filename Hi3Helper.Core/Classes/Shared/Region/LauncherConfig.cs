@@ -4,6 +4,7 @@ using Hi3Helper.Shared.ClassStruct;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
 using System.Text;
@@ -22,8 +23,8 @@ namespace Hi3Helper.Shared.Region
     }
     #endregion
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("ReSharper", "InconsistentNaming")]
-    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("ReSharper", "RedundantDefaultMemberInitializer")]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    [SuppressMessage("ReSharper", "RedundantDefaultMemberInitializer")]
     public static class LauncherConfig
     {
         #region Main Launcher Config Methods
@@ -220,7 +221,6 @@ namespace Hi3Helper.Shared.Region
         public static readonly string AppConfigFile      = Path.Combine(AppDataFolder!, "config.ini");
         public static readonly string AppNotifIgnoreFile = Path.Combine(AppDataFolder,  "ignore_notif_ids.json");
         
-        public static string AppCurrentVersionString { get; set; }
         public static string GamePathOnSteam;
         public static long   AppGameConfigLastUpdate;
         public static int AppCurrentThread

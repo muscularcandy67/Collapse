@@ -1,23 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Windows.Foundation;
-using Windows.UI;
-using CollapseLauncher.DiscordPresence;
+﻿using CollapseLauncher.DiscordPresence;
 using CollapseLauncher.Extension;
 using CollapseLauncher.Helper.Metadata;
 using CollapseLauncher.Pages;
 using Hi3Helper;
 using Hi3Helper.Shared.ClassStruct;
 using Microsoft.UI.Text;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Windows.Foundation;
+using Windows.UI;
 using static Hi3Helper.InvokeProp;
 using static Hi3Helper.Shared.Region.LauncherConfig;
-using WindowId = Microsoft.UI.WindowId;
 
 #nullable enable
 namespace CollapseLauncher
@@ -57,7 +56,6 @@ namespace CollapseLauncher
         public static NotificationPush?    NotificationData;
         public static bool                 IsCustomBG            = false;
         public static bool                 IsSkippingUpdateCheck = false;
-        public static GameVersion          AppCurrentVersion;
         public static AppThemeMode         CurrentAppTheme;
     #if !DISABLEDISCORD
     #pragma warning disable CA2211
@@ -82,7 +80,7 @@ namespace CollapseLauncher
         public static List<StackPanel> BuildGameTitleListUI()
         {
             List<StackPanel> list = [];
-            foreach (string title in LauncherMetadataHelper.GetGameNameCollection()!)
+            foreach (string? title in LauncherMetadataHelper.GetGameNameCollection()!)
             {
                 StackPanel panel              = UIElementExtensions.CreateStackPanel(Orientation.Horizontal);
                 TextBlock  gameTitleTextBlock = panel.AddElementToStackPanel(new TextBlock { Text = title });
@@ -100,8 +98,8 @@ namespace CollapseLauncher
             return list;
         }
 
-        public static List<StackPanel> BuildGameRegionListUI(string?        gameCategory,
-                                                             List<string?>? gameCategoryList = null)
+        public static async ValueTask<List<StackPanel>> BuildGameRegionListUI(string?        gameCategory,
+                                                                              List<string?>? gameCategoryList = null)
         {
             gameCategoryList ??= LauncherMetadataHelper.GetGameRegionCollection(gameCategory);
             List<StackPanel> list = [];
@@ -112,7 +110,7 @@ namespace CollapseLauncher
 
             foreach (string? region in gameCategoryList)
             {
-                PresetConfig? config              = LauncherMetadataHelper.GetMetadataConfig(gameCategory, region);
+                PresetConfig? config              = await LauncherMetadataHelper.GetMetadataConfig(gameCategory, region);
                 StackPanel    panel               = UIElementExtensions.CreateStackPanel(Orientation.Horizontal);
                 TextBlock     gameRegionTextBlock = panel.AddElementToStackPanel(new TextBlock { Text = region });
                 TextBlock? gameRegionTranslatedTextBlock =
